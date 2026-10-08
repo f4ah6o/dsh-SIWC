@@ -36,7 +36,23 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 bundle が ChatGPT plugin 行を追加します。削除する場合は `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` を実行します。npm にはまだ公開されていません。Host API の対応確認済み DSH バージョンは `0.2.0-rc.2` と `0.2.1-alpha.1` です。
 
-Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含み、本 bundle は既存の標準 entry とその設定に触れません。独立した `sdk-minimal` profile には、Host の必須サービスを用意するため、bundle が実際の Authorization とローカル Credentials provider を別の profile entry として追加します。後から適用する profile patch で、どちらの entry も置き換えたり無効にしたりできます。
+Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含みます。独立した `sdk-minimal` profile には Credentials と Authorization がありません。該当 profile に DSH と同じバージョンの provider package を追加し、`cordis.patch.yml` に entry を追加します。
+
+```sh
+pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
+```
+
+DSH が `0.2.1-alpha.1` の場合は両方の package に `0.2.1-alpha.1` を使い、異なる DSH API バージョンを混在させないでください。ChatGPT bundle を追加した後、次の entry を配置します。
+
+```yaml
+- insert:
+    - id: authorization
+      name: '@deepseek-ai/dsh-authorization'
+    - id: credentials
+      name: '@deepseek-ai/dsh-credentials-local'
+```
+
+Credentials、Authorization、LLM が利用可能になるまで、ChatGPT Host は pending のままです。bundle は `dsh-base` を使う profile の provider entry を置き換えません。
 
 ### ローカル PC でサインイン
 

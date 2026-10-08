@@ -1,12 +1,4 @@
-# Supply local authorization providers to the standalone sdk-minimal bundle.
+# Add the ChatGPT provider to profiles that install this bundle.
 - insert:
-    - id: chatgpt-local-authorization
-      name: '@deepseek-ai/dsh-authorization'
-      disabled: !!js "ctx.get('profileContext')?.startedBundles.includes('@deepseek-ai/dsh-base') || !ctx.get('profileContext')?.startedBundles.includes('@deepseek-ai/dsh-sdk-minimal')"
-
-    - id: chatgpt-local-credentials
-      name: '@deepseek-ai/dsh-credentials-local'
-      disabled: !!js "ctx.get('profileContext')?.startedBundles.includes('@deepseek-ai/dsh-base') || !ctx.get('profileContext')?.startedBundles.includes('@deepseek-ai/dsh-sdk-minimal')"
-
     - id: chatgpt
       name: '@f4ah6o/dsh-chatgpt'

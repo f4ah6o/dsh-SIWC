@@ -36,7 +36,23 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 bundle 会添加 ChatGPT plugin 配置项。运行 `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` 可移除该项。本包尚未发布到 npm。已验证的 DSH Host API 版本为 `0.2.0-rc.2` 和 `0.2.1-alpha.1`。
 
-Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务；本 bundle 不会修改这些标准 entry 及其配置。对于独立的 `sdk-minimal` profile，bundle 会通过独立 profile entry 添加真正的 Authorization 和本地 Credentials provider，以提供 Host 所需服务。后续 profile patch 仍可替换或禁用任一 entry。
+Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务。独立的 `sdk-minimal` profile 不包含 Credentials 和 Authorization。请在该 profile 中安装与 DSH 版本匹配的 provider package，并在其 `cordis.patch.yml` 中添加对应 entry：
+
+```sh
+pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
+```
+
+若 DSH 版本为 `0.2.1-alpha.1`，两个 package 都使用 `0.2.1-alpha.1`；请勿混用两条 DSH API 版本线。安装 ChatGPT bundle 后，添加以下 entry：
+
+```yaml
+- insert:
+    - id: authorization
+      name: '@deepseek-ai/dsh-authorization'
+    - id: credentials
+      name: '@deepseek-ai/dsh-credentials-local'
+```
+
+Credentials、Authorization 和 LLM 服务可用前，ChatGPT Host 会保持 pending 状态。bundle 不会替换 base-backed profile 中的 provider entry。
 
 ### 在本机登录
 

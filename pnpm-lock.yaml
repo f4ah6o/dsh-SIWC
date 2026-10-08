@@ -26,9 +26,6 @@ importers:
 
   packages/chatgpt:
     dependencies:
-      '@deepseek-ai/dsh-credentials-local':
-        specifier: 0.2.0-rc.2 || 0.2.1-alpha.1
-        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(@deepseek-ai/dsh-atomic-write@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))(@deepseek-ai/dsh-credentials@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))(@deepseek-ai/dsh-home-paths@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))(@deepseek-ai/dsh-launch-environment@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))
       '@deepseek-ai/schemastery':
         specifier: ^3.18.4
         version: 3.18.4
@@ -48,15 +45,15 @@ importers:
       '@deepseek-ai/cordis-plugin-loader':
         specifier: 1.0.6-alpha.1
         version: 1.0.6-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(node-addon-require-builtin@0.1.7)
+      '@deepseek-ai/dsh-api-gateway':
+        specifier: 0.2.1-alpha.1
+        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(@deepseek-ai/dsh-client-connection@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(@deepseek-ai/dsh-scope@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)))
       '@deepseek-ai/dsh-api-remotes':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(@deepseek-ai/dsh-scope@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))
       '@deepseek-ai/dsh-api-session-controller':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(33279902a5d7c447abb74f1ff35327e3)
-      '@deepseek-ai/dsh-atomic-write':
-        specifier: 0.2.1-alpha.1
-        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
       '@deepseek-ai/dsh-attachment':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(@deepseek-ai/dsh-brand@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))
@@ -66,6 +63,9 @@ importers:
       '@deepseek-ai/dsh-brand':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
+      '@deepseek-ai/dsh-client-connection':
+        specifier: 0.2.1-alpha.1
+        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(@deepseek-ai/dsh-scope@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))
       '@deepseek-ai/dsh-client-locale':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
@@ -102,12 +102,9 @@ importers:
       '@deepseek-ai/dsh-credentials':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
-      '@deepseek-ai/dsh-home-paths':
+      '@deepseek-ai/dsh-credentials-local':
         specifier: 0.2.1-alpha.1
-        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
-      '@deepseek-ai/dsh-launch-environment':
-        specifier: 0.2.1-alpha.1
-        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
+        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)(@deepseek-ai/dsh-atomic-write@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))(@deepseek-ai/dsh-credentials@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))(@deepseek-ai/dsh-home-paths@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))(@deepseek-ai/dsh-launch-environment@0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1))
       '@deepseek-ai/dsh-llm':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
@@ -118,6 +115,9 @@ importers:
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(patch_hash=da9d7a5ddccbb1ba4fdaf83c9f57383e5d884d1617dfa3348604266766558815)(@deepseek-ai/cordis@4.0.5-alpha.1)
       '@deepseek-ai/dsh-typert-protocol':
+        specifier: 0.2.1-alpha.1
+        version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
+      '@deepseek-ai/dsh-typert-registry':
         specifier: 0.2.1-alpha.1
         version: 0.2.1-alpha.1(@deepseek-ai/cordis@4.0.5-alpha.1)
       '@testing-library/react':

@@ -40,14 +40,32 @@ describe('ChatGPT Host Loader integration', () => {
     expect(typeof unwrapped.Config).toBe('function')
     expect(typeof unwrapped.apply).toBe('function')
 
-    const home = await mkdtemp(join(tmpdir(), 'dsh-chatgpt-loader-'))
-    homes.push(home)
     const ctx = new Context()
     contexts.push(ctx)
+    await ctx.plugin(Loader)
+    ctx.loader.internal = {
+      version: 'test',
+      import: async (specifier: string) => {
+        expect(specifier).toBe('@f4ah6o/dsh-chatgpt')
+        return chatGptPlugin
+      },
+    } as never
+    const entryId = await ctx.loader.create({ name: '@f4ah6o/dsh-chatgpt' })
+    const entry = ctx.loader.resolve(entryId)
+    await ctx.loader.await()
+    // Cordis publishes FiberState as a const enum, so its runtime package has no enum object.
+    expect(entry.fiber?.state).toBe(0)
+    expect(ctx.get('chatgptController')).toBeUndefined()
+
+    const home = await mkdtemp(join(tmpdir(), 'dsh-chatgpt-loader-'))
+    homes.push(home)
     await ctx.plugin(LocalCredentialProvider, { path: join(home, '.credentials.yaml'), watch: false })
     await ctx.plugin(AuthorizationService)
     await ctx.plugin(LlmRuntime)
-    const hostFiber = await ctx.plugin(unwrapped as Parameters<Context['plugin']>[0])
+    await ctx.loader.await()
+    const hostFiber = entry.fiber
+    if (hostFiber === undefined) throw new Error('The Host plugin entry did not create a Cordis fiber.')
+    expect(hostFiber.state).toBe(2)
 
     const ticket = await ctx.chatgptController.beginLogin({})
     const flow = ctx.authorization.list().find(entry => entry.label === 'ChatGPT')

@@ -36,7 +36,23 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 The bundle inserts the ChatGPT plugin row. Remove it with `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt`. The package has not been published to npm yet. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1`; other DSH API versions are not covered.
 
-The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`; this bundle leaves those standard entries and their configuration untouched. For the standalone `sdk-minimal` profile, the bundle adds the real Authorization and local Credentials providers under separate profile entries so the Host's required services are available. A profile patch applied after the bundle can replace or disable either entry.
+The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`. The standalone `sdk-minimal` profile omits Credentials and Authorization. Add matching provider packages to that profile, then add their rows to its `cordis.patch.yml`:
+
+```sh
+pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
+```
+
+Use `0.2.1-alpha.1` for both packages when the DSH installation is `0.2.1-alpha.1`; do not mix the two DSH API lines. Add these rows after installing the ChatGPT bundle:
+
+```yaml
+- insert:
+    - id: authorization
+      name: '@deepseek-ai/dsh-authorization'
+    - id: credentials
+      name: '@deepseek-ai/dsh-credentials-local'
+```
+
+The ChatGPT Host remains pending until Credentials, Authorization, and LLM are available. The bundle does not replace provider rows in base-backed profiles.
 
 ### Sign in on the local machine
 
