@@ -124,7 +124,7 @@ Adapter 将系统指令放入 Responses `instructions` 字段，把完整 DSH �
 
 #### KV Cache 影响
 
-每次请求都会向 OpenAI 发送完整历史；adapter 不使用 `previous_response_id`。Responses 请求使用 `store: false`，并在 DSH request state 中保留完成的 response items 供后续请求重放。
+每次请求都会向 OpenAI 发送完整历史；adapter 不使用 `previous_response_id`。Responses 请求使用 `store: false`，并显式请求加密 reasoning 内容。adapter 会在 DSH request state 中保留 SDK 可重放的已完成 response items；如果响应包含当前 SDK 无法重放的 item，请求会失败，并且诊断只包含 item type 名称。
 
 ## 已知限制
 

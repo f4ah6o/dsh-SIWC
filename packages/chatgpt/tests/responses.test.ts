@@ -192,6 +192,7 @@ describe('ChatGPT Responses adapter', () => {
       model: officialModel.id,
       store: false,
       stream: true,
+      include: ['reasoning.encrypted_content'],
       instructions: 'One-shot system instruction.',
     })
     expect(capturedBody).not.toHaveProperty('max_output_tokens')
@@ -285,6 +286,104 @@ describe('ChatGPT Responses adapter', () => {
       },
       { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'Continue.' }] },
     ])
+  })
+
+  it('replays SDK-supported configuration updates in stateless history', async () => {
+    const configuration = {
+      id: 'cfg_1',
+      type: 'configuration_update',
+      reasoning: { effort: 'high' },
+    }
+    const message = {
+      id: 'msg_configuration',
+      type: 'message',
+      role: 'assistant',
+      status: 'completed',
+      content: [{ type: 'output_text', text: 'Configured.', annotations: [] }],
+    }
+    const events = [
+      { type: 'response.output_item.done', output_index: 0, sequence_number: 1, item: configuration },
+      { type: 'response.output_item.done', output_index: 1, sequence_number: 2, item: message },
+      {
+        type: 'response.completed',
+        sequence_number: 3,
+        response: {
+          id: 'resp_configuration',
+          object: 'response',
+          created_at: 1,
+          status: 'completed',
+          error: null,
+          incomplete_details: null,
+          output: [configuration, message],
+          model: officialModel.id,
+          usage: null,
+        },
+      },
+    ]
+    const bodies: Record<string, unknown>[] = []
+    const adapter = new ChatGptResponsesAdapter(hostFor(), {
+      fetch: eventFetch(events, (_request, body) => { bodies.push(body) }),
+    })
+    const prior = await assistantFromResponse(adapter)
+
+    await collect(adapter, options({
+      messages: [
+        { role: 'user', content: [{ type: 'text', text: 'First question.' }] },
+        prior,
+        { role: 'user', content: [{ type: 'text', text: 'Continue.' }] },
+      ],
+    }))
+
+    const secondInput = bodies[1]?.input as Array<Record<string, unknown>>
+    expect(secondInput).toContainEqual(configuration)
+  })
+
+  it('reports only sanitized item type names when response history cannot be replayed', async () => {
+    const output = {
+      id: 'private-response-item-id',
+      type: 'future_private_item',
+      text: 'private response content',
+      access_token: 'private-access-token',
+      encrypted_content: 'private-encrypted-content',
+    }
+    const message = {
+      id: 'msg_unsupported',
+      type: 'message',
+      role: 'assistant',
+      status: 'completed',
+      content: [{ type: 'output_text', text: 'Partial answer.', annotations: [] }],
+    }
+    const events = [
+      { type: 'response.output_item.done', output_index: 0, sequence_number: 1, item: message },
+      { type: 'response.output_item.done', output_index: 1, sequence_number: 2, item: output },
+      {
+        type: 'response.completed',
+        sequence_number: 3,
+        response: {
+          id: 'private-response-id',
+          object: 'response',
+          created_at: 1,
+          status: 'completed',
+          error: null,
+          incomplete_details: null,
+          output: [message, output],
+          model: officialModel.id,
+          usage: null,
+        },
+      },
+    ]
+    const adapter = new ChatGptResponsesAdapter(hostFor(), { fetch: eventFetch(events) })
+
+    const error = await collect(adapter, options()).catch(value => value)
+    expect(error).toMatchObject({
+      code: 'UNSUPPORTED_CONTENT',
+      message: 'OpenAI Responses output item types cannot be replayed with store:false: future_private_item',
+    })
+    expect(error.message).not.toContain('private-response-item-id')
+    expect(error.message).not.toContain('private response content')
+    expect(error.message).not.toContain('private-access-token')
+    expect(error.message).not.toContain('private-encrypted-content')
+    expect(error.message).not.toContain('private-response-id')
   })
 
   it('does not replay encrypted reasoning after the active account changes', async () => {

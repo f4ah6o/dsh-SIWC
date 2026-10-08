@@ -5,6 +5,7 @@ import {
   OpenAI,
   type ClientOptions,
 } from 'openai'
+import { toResponseInputItem } from 'openai/lib/responses/ResponseInputItems'
 import type {
   ResponseCreateParamsStreaming,
   ResponseInputItem,
@@ -235,6 +236,7 @@ async function createRequest(
     input,
     store: false,
     stream: true,
+    include: ['reasoning.encrypted_content'],
     ...(instructions === undefined ? {} : { instructions }),
     ...(effort === undefined ? {} : { reasoning: { effort: responsesReasoningEffort(String(effort)) } }),
   }
@@ -633,10 +635,18 @@ async function* translateEvents(
           if (end !== undefined) yield end
         }
         if (blocks.size === 0) throw new LlmError(`OpenAI model "${replayScope.model}" returned no content`, 'EMPTY_RESPONSE')
-        const replayItems = event.response.output.map((item, index) =>
-          completedOutputItems.get(index) ?? replayableOutputItem(item))
-        if (replayItems.length === 0 || replayItems.some(item => item === undefined)) {
-          throw new LlmError('OpenAI Responses returned an output item that cannot be replayed with store:false', 'UNSUPPORTED_CONTENT')
+        const replayItems: ResponseInputItem[] = []
+        const unsupportedOutputTypes: string[] = []
+        for (const [index, item] of event.response.output.entries()) {
+          const replayItem = completedOutputItems.get(index) ?? replayableOutputItem(item)
+          if (replayItem === undefined) unsupportedOutputTypes.push(outputTypeName(item))
+          else replayItems.push(replayItem)
+        }
+        if (unsupportedOutputTypes.length > 0) {
+          throw unsupportedReplayOutputError(unsupportedOutputTypes)
+        }
+        if (replayItems.length === 0) {
+          throw new LlmError('OpenAI Responses completed without replayable output items', 'UNSUPPORTED_CONTENT')
         }
         const usage = mapUsage(event.response.usage)
         if (usage !== undefined) yield { type: 'usage', usage }
@@ -678,8 +688,28 @@ async function* translateEvents(
 }
 
 function replayableOutputItem(item: ResponseOutputItem): ResponseInputItem | undefined {
-  if (item.type === 'message' || item.type === 'function_call' || item.type === 'reasoning') return item
-  return undefined
+  try {
+    const inputItem = toResponseInputItem(item)
+    return inputItem !== null && isReplayInputItem(inputItem) ? inputItem : undefined
+  } catch (error: unknown) {
+    if (error instanceof TypeError) return undefined
+    throw error
+  }
+}
+
+function outputTypeName(item: ResponseOutputItem): string {
+  if (!isRecord(item) || typeof item.type !== 'string') return 'unknown'
+  return /^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$/u.test(item.type) ? item.type : 'unknown'
+}
+
+function unsupportedReplayOutputError(types: readonly string[]): LlmError {
+  const names = [...new Set(types)].sort()
+  const shownNames = names.slice(0, 8).join(', ')
+  const remaining = names.length > 8 ? `, and ${names.length - 8} more` : ''
+  return new LlmError(
+    `OpenAI Responses output item types cannot be replayed with store:false: ${shownNames}${remaining}`,
+    'UNSUPPORTED_CONTENT',
+  )
 }
 
 function readReplayItems(
@@ -705,6 +735,10 @@ function isReplayInputItem(value: unknown): value is ResponseInputItem {
   if (!isRecord(value)) return false
   if (value.type === 'reasoning') return isReasoningInputItem(value)
   if (value.type === 'message') return isAssistantOutputMessage(value)
+  if (value.type === 'configuration_update') return isConfigurationUpdateItem(value)
+  if (value.type === 'compaction') {
+    return typeof value.encrypted_content === 'string' && optionalItemId(value.id)
+  }
   if (value.type === 'function_call') {
     return typeof value.call_id === 'string'
       && typeof value.name === 'string'
@@ -713,6 +747,15 @@ function isReplayInputItem(value: unknown): value is ResponseInputItem {
       && optionalItemStatus(value.status)
   }
   return false
+}
+
+function isConfigurationUpdateItem(value: Record<string, unknown>): boolean {
+  if (value.type !== 'configuration_update' || !optionalItemId(value.id)) return false
+  if (value.reasoning === undefined) return true
+  if (!isRecord(value.reasoning)) return false
+  const effort = value.reasoning.effort
+  return effort === undefined || effort === null
+    || (typeof effort === 'string' && isResponsesReasoningEffort(effort))
 }
 
 function isReasoningInputItem(value: Record<string, unknown>): boolean {

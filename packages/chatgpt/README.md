@@ -138,7 +138,7 @@ Conversation history, image inputs, function schemas, and tool results contribut
 
 #### KV Cache effect
 
-OpenAI receives the full request history on each call; the adapter does not send `previous_response_id`. Responses use `store: false`, so the adapter retains the completed response items locally in the DSH request state for replay.
+OpenAI receives the full request history on each call; the adapter does not send `previous_response_id`. Responses use `store: false` and explicitly request encrypted reasoning content. The adapter retains SDK-replayable completed response items locally in the DSH request state; if a response contains an item the installed SDK cannot replay, the request fails with a diagnostic containing only item type names.
 
 ## Known Limitations
 
