@@ -51,7 +51,7 @@ async function home(): Promise<string> {
   return path
 }
 
-async function boot(path: string, selected: string | undefined): Promise<{
+async function boot(path: string, selected: string | undefined, savedHostId?: string): Promise<{
   readonly ctx: Context
   readonly host: ChatGptHost
   readonly active: ReturnType<typeof mutable<string | undefined>>
@@ -62,6 +62,12 @@ async function boot(path: string, selected: string | undefined): Promise<{
   contexts.push(ctx)
   await ctx.plugin(LocalCredentialProvider, { path: join(path, '.credentials.yaml'), watch: false })
   await ctx.plugin(AuthorizationService)
+  if (savedHostId !== undefined) {
+    await ctx.credentials.modifyRecord(credentialKey('dsh-chatgpt', 'host'), async () => ({
+      kind: 'grant',
+      payload: { version: 1, hostId: savedHostId },
+    }))
+  }
   const refs = config(selected)
   const host = new ChatGptHost(ctx, refs.config)
   await host.initialize()
@@ -114,6 +120,11 @@ describe('ChatGPT Host account selection and request pinning', () => {
     const { ctx, host } = await boot(path, undefined)
     const ticket = await host.beginLogin()
     const authorize = new URL(ticket.authorizationUrl)
+    const hostRecord = await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', 'host'))
+    if (hostRecord?.kind !== 'grant') throw new Error('ChatGPT Host did not persist its host identity.')
+    const hostId = hostRecord.payload.hostId
+    expect(hostId).toMatch(/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu)
+    expect(authorize.searchParams.get('ext_agent_host_id')).toBe(hostId)
     const redirectUri = authorize.searchParams.get('redirect_uri')
     const state = authorize.searchParams.get('state')
     const nonce = authorize.searchParams.get('nonce')
@@ -187,6 +198,18 @@ describe('ChatGPT Host account selection and request pinning', () => {
     const safeState = await host.getState()
     expect(JSON.stringify(safeState)).not.toContain('new-access-token')
     expect(JSON.stringify(safeState)).not.toContain('new-refresh-token')
+  })
+
+  it('migrates an existing bare UUID host ID to the SIWC URN without changing its UUID', async () => {
+    const path = await home()
+    const legacyId = crypto.randomUUID()
+    const { ctx, host } = await boot(path, undefined, legacyId)
+    const record = await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', 'host'))
+    expect(record).toMatchObject({ payload: { version: 1, hostId: `urn:uuid:${legacyId}` } })
+
+    const ticket = await host.beginLogin()
+    expect(new URL(ticket.authorizationUrl).searchParams.get('ext_agent_host_id')).toBe(`urn:uuid:${legacyId}`)
+    await host.cancelLogin(ticket.attemptId)
   })
 
   it('returns the new login attempt when separate attempts share a millisecond timestamp', async () => {

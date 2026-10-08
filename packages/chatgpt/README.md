@@ -56,7 +56,7 @@ The bundle does not replace provider rows in base-backed profiles.
 
 ### Sign in on the local machine
 
-Web and Desktop users can open **Settings → ChatGPT**, add one or more accounts, and choose which account the profile uses. The OAuth callback listens only on loopback at `127.0.0.1`; complete sign-in in a browser on the same PC. Remote-hosted browsers and cloud sign-in are unsupported. The flow uses OpenAI’s [Sign in with ChatGPT registration](https://developers.openai.com/siwc/token-sharing-open-source/sign-in) and does not require a Codex CLI installation.
+Web and Desktop users can open **Settings → ChatGPT**, add one or more accounts, and choose which account the profile uses. The OAuth callback listens only on loopback at `127.0.0.1`; complete sign-in in a browser on the same PC. Remote-hosted browsers and cloud sign-in are unsupported. The Host persists a stable `urn:uuid:` identifier and reuses it for sign-in. The flow uses OpenAI’s [Sign in with ChatGPT registration](https://developers.openai.com/siwc/token-sharing-open-source/sign-in) and does not require a Codex CLI installation.
 
 The OAuth request asks for `openid`, `profile`, `email`, `offline_access`, `resource.invoke`, and `chatgpt.tokens.use.direct`. If a new registration verifies the ChatGPT identity but does not grant every required permission or a renewable token, the Host retains only its issued client ID and verified subject/email as `needs-sign-in`; it stores no token and does not expose models. An incomplete reauthorization leaves the previous connected grant intact. Registrations are distinct by issued client ID and verified subject, not by email.
 

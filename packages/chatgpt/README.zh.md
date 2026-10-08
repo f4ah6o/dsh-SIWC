@@ -56,7 +56,7 @@ bundle 不会替换 base-backed profile 中的 provider entry。
 
 ### 在本机登录
 
-Web 和 Desktop 用户可在 **Settings → ChatGPT** 添加账号，并选择该 profile 使用的账号。OAuth callback 只监听 `127.0.0.1`，请在同一台电脑上的浏览器完成登录。不支持远程主机浏览器或云端登录。此流程使用 OpenAI 的 [Sign in with ChatGPT 动态注册](https://developers.openai.com/siwc/token-sharing-open-source/sign-in)，不依赖 Codex CLI。
+Web 和 Desktop 用户可在 **Settings → ChatGPT** 添加账号，并选择该 profile 使用的账号。OAuth callback 只监听 `127.0.0.1`，请在同一台电脑上的浏览器完成登录。不支持远程主机浏览器或云端登录。Host 会保存稳定的 `urn:uuid:` 标识，并在每次登录时重用。此流程使用 OpenAI 的 [Sign in with ChatGPT 动态注册](https://developers.openai.com/siwc/token-sharing-open-source/sign-in)，不依赖 Codex CLI。
 
 OAuth 请求以下权限：`openid`、`profile`、`email`、`offline_access`、`resource.invoke` 和 `chatgpt.tokens.use.direct`。新注册即使验证了 ChatGPT 身份，如果缺少任何必需权限或可续期 token，Host 也只会以 `needs-sign-in` 保存已签发的 client ID 和已验证的 subject/email。它不会保存 token，也不会提供模型。不完整的重新授权不会替换旧的已连接 grant。注册按已签发的 client ID 和已验证 subject 区分，而不是按 email 区分。
 

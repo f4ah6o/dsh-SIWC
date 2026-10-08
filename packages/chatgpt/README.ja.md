@@ -56,7 +56,7 @@ bundle は `dsh-base` を使う profile の provider entry を置き換えませ
 
 ### ローカル PC でサインイン
 
-Web と Desktop では **Settings → ChatGPT** からアカウントを追加し、profile で使うアカウントを選択できます。OAuth callback は `127.0.0.1` のみで待ち受けるため、同じ PC のブラウザーで認証を完了してください。リモートホストのブラウザーやクラウドでのサインインには対応していません。フローは OpenAI の [Sign in with ChatGPT 登録](https://developers.openai.com/siwc/token-sharing-open-source/sign-in)を使い、Codex CLI には依存しません。
+Web と Desktop では **Settings → ChatGPT** からアカウントを追加し、profile で使うアカウントを選択できます。OAuth callback は `127.0.0.1` のみで待ち受けるため、同じ PC のブラウザーで認証を完了してください。リモートホストのブラウザーやクラウドでのサインインには対応していません。Host は安定した `urn:uuid:` 識別子を保存し、サインインごとに再利用します。フローは OpenAI の [Sign in with ChatGPT 登録](https://developers.openai.com/siwc/token-sharing-open-source/sign-in)を使い、Codex CLI には依存しません。
 
 OAuth は `openid`、`profile`、`email`、`offline_access`、`resource.invoke`、`chatgpt.tokens.use.direct` を要求します。新規登録で ID を検証できても必要な許可または更新可能なトークンがない場合、Host は発行 client ID と検証済み subject/email だけを `needs-sign-in` として保存します。トークンは保存せず、モデルも公開しません。不完全な再認証では以前の接続済み grant を保持します。メールアドレスではなく、発行 client ID と検証済み subject で登録を区別します。
 

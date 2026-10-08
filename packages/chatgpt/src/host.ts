@@ -23,6 +23,7 @@ const CREDENTIAL_SCOPE = 'dsh-chatgpt'
 const HOST_KEY = credentialKey(CREDENTIAL_SCOPE, 'host')
 const ACCOUNT_ID_PREFIX = 'account-'
 const DYNAMIC_CLIENT_ID = 'dynamic_agent_client'
+const HOST_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
 const CATALOG_URL = 'https://api.openai.com/v1/models'
 const CALLBACK_PATH = '/auth/callback'
 const ACCOUNT_REQUEST_ERROR = 'The ChatGPT account registration is unavailable.'
@@ -110,10 +111,13 @@ export class ChatGptHost implements ChatGptAdapterHost {
   async initialize(): Promise<void> {
     await this.ctx.credentials.modifyRecord(HOST_KEY, async current => {
       if (current !== undefined) {
-        readHost(current)
-        return current
+        const saved = grantPayload(current, 'ChatGPT host identity')
+        const host = readHost(current)
+        // Older plugin builds stored the UUID without the URI prefix.
+        if (saved.hostId === host.hostId) return current
+        return { kind: 'grant', payload: host }
       }
-      return { kind: 'grant', payload: { version: 1, hostId: randomUUID() } }
+      return { kind: 'grant', payload: { version: 1, hostId: `urn:uuid:${randomUUID()}` } }
     })
     for (const account of await this.accountRecords()) this.registerAccountFlow(accountIdOf(account.accountId))
   }
@@ -988,10 +992,12 @@ function accountRecord(account: Omit<StoredAccount, 'version'> | StoredAccount):
 
 function readHost(record: CredentialRecord | undefined): StoredHost {
   const payload = grantPayload(record, 'ChatGPT host identity')
-  if (payload.version !== 1 || typeof payload.hostId !== 'string' || payload.hostId.length === 0) {
+  if (payload.version !== 1 || typeof payload.hostId !== 'string') {
     throw new Error('The saved ChatGPT host identity is invalid.')
   }
-  return { version: 1, hostId: payload.hostId }
+  const savedId = payload.hostId.startsWith('urn:uuid:') ? payload.hostId.slice('urn:uuid:'.length) : payload.hostId
+  if (!HOST_UUID_PATTERN.test(savedId)) throw new Error('The saved ChatGPT host identity is invalid.')
+  return { version: 1, hostId: `urn:uuid:${savedId.toLowerCase()}` }
 }
 
 function readAccount(record: CredentialRecord, accountId: string): StoredAccount {
