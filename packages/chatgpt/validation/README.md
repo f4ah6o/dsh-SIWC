@@ -15,3 +15,13 @@ When the plugin is installed directly in the consumer, `DSH_PLUGIN_DIR` may be o
 The fixture generates a local signing key, fake OAuth tokens, a local callback server, and a fake Responses SSE endpoint. Requests to the OpenAI hosts are redirected to that local fixture; any other external request is blocked. The probe needs no account, secret, or live API call. It checks the login host ID, title generation through the public title helper with a 64-token policy, compaction through `BasicCompactionEngine` with a 65,536-token policy, Responses tool calls and usage mapping, and rejection of an ordinary `maxTokens` request before HTTP.
 
 Responses requests omit `max_output_tokens`. The policy values remain recorded by DSH and guide the title and compaction callers, but the provider cannot enforce those values as output ceilings when the Responses API request omits the cap.
+
+## Recorded compatibility run
+
+The v3 package tarball has SHA-256 `139c61df89e0b8ab4aaddd1e0c26976c6aafdbc5a3c5098ead62b5979f3e2ecc`. The byte-identical archive is preserved at `dist/f4ah6o-dsh-chatgpt-0.1.0.tgz` in the plugin checkout. The run completed on 2026-10-08 against published DSH `0.2.0-rc.2` and `0.2.1-alpha.1` installations.
+
+Both versions passed the SDK Host probe, initialize/shutdown and disposal checks, a headless task against a local DeepSeek stub, the Web account-empty state with the generated Remote, `sdk-minimal` with matching public provider packages, and the preflight failure case with required providers disabled. Both versions also passed the auxiliary wire probe described above, including the persisted `urn:uuid:` host ID, title and compaction invocation policies, Responses tool and usage mapping, and rejection of an ordinary output-cap request before HTTP. Consumer logs are under `/tmp/dsh-chatgpt-compat-nan9yvg1/harness-v3-final/<version>/logs/` on the validation host.
+
+The test used local OAuth and Responses fixtures; it did not authorize a real ChatGPT account or make a real ChatGPT inference request. A v3 install against the `f4ah6o/deepseek-harness` fork has not been run. Earlier fork smoke tests covered the preceding v2 artifact, so they do not establish v3 fork compatibility.
+
+The final local source checks passed: `pnpm test` reported 10 files and 69 tests passed in 4.77 seconds, `pnpm run typecheck` passed, `pnpm run build` passed for Host and Client, and `git diff --check` passed. The two direct auxiliary probe commands described above also exited successfully. This workspace has no lint script or linter configuration.
