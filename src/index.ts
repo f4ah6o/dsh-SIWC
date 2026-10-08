@@ -4,7 +4,8 @@ import { brandString } from '@deepseek-ai/dsh-brand'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type { Config as PluginConfig } from './config.ts'
 import type {
-  ChatGptAccountRequest, ChatGptCancelLoginRequest, ChatGptLoginTicket, ChatGptModelConfigUpdate, ChatGptState,
+  ChatGptAccountRequest, ChatGptCancelLoginRequest, ChatGptLoginRequest, ChatGptLoginTicket,
+  ChatGptModelConfigUpdate, ChatGptSignOutResult, ChatGptState,
 } from './types.ts'
 
 export type * from './types.ts'
@@ -44,7 +45,7 @@ export class ChatGptController extends TypertRemoteService {
    * @returns the safe attempt handle and authorization URL.
    */
   @Remote
-  beginLogin(): Promise<ChatGptLoginTicket> {
+  beginLogin(_request: ChatGptLoginRequest): Promise<ChatGptLoginTicket> {
     return Promise.reject(new Error('ChatGPT sign-in is not available until the account service is configured'))
   }
 
@@ -70,7 +71,7 @@ export class ChatGptController extends TypertRemoteService {
    * @param accountId - account to disconnect.
    */
   @Remote
-  signOut(request: ChatGptAccountRequest): Promise<void> {
+  signOut(request: ChatGptAccountRequest): Promise<ChatGptSignOutResult> {
     void request
     return Promise.reject(new Error('No ChatGPT accounts are connected'))
   }

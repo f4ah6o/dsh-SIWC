@@ -94,6 +94,18 @@ export interface ChatGptLoginTicket {
   readonly authorizationUrl: string
 }
 
+/** Start a new account registration or reauthorize one saved registration. */
+export interface ChatGptLoginRequest {
+  /** Existing account to reauthorize; omission starts a new registration. */
+  readonly accountId?: ChatGptAccountId
+}
+
+/** Result of local logout and the best-effort OpenAI token revocation. */
+export interface ChatGptSignOutResult {
+  /** Whether OpenAI confirmed revocation of the saved renewable session. */
+  readonly revocationConfirmed: boolean
+}
+
 /** Address one existing account registration. */
 export interface ChatGptAccountRequest {
   /** Account selected by the user. */

@@ -17,6 +17,8 @@ export interface Config {
   readonly requestTimeoutMs: Volatile<number>
   /** Delay between Client snapshots while a sign-in callback is pending. */
   readonly loginPollIntervalMs: Volatile<number>
+  /** Maximum time to keep one browser authorization callback pending. */
+  readonly loginTimeoutMs: Volatile<number>
 }
 
 const modelOverride = z.object({
@@ -35,4 +37,5 @@ export const Config: z = z.object({
   modelOverrides: z.array(modelOverride).default([]).volatile(),
   requestTimeoutMs: z.number().step(1).min(1).max(30_000).default(10_000).volatile(),
   loginPollIntervalMs: z.number().step(1).min(1).max(30_000).default(1_000).volatile(),
+  loginTimeoutMs: z.number().step(1).min(1_000).max(30 * 60_000).default(5 * 60_000).volatile(),
 })
