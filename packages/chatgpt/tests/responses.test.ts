@@ -338,6 +338,162 @@ describe('ChatGPT Responses adapter', () => {
     expect(secondInput).toContainEqual(configuration)
   })
 
+  it('replays streamed output items by index when the terminal response output is empty', async () => {
+    const configuration = {
+      id: 'cfg_streamed',
+      type: 'configuration_update',
+      reasoning: { effort: 'high' },
+    }
+    const reasoning = {
+      id: 'rs_streamed',
+      type: 'reasoning',
+      summary: [{ type: 'summary_text', text: 'Think.' }],
+      encrypted_content: 'streamed-encrypted-reasoning',
+      status: 'completed',
+    }
+    const message = {
+      id: 'msg_streamed',
+      type: 'message',
+      role: 'assistant',
+      status: 'completed',
+      content: [{ type: 'output_text', text: 'Answer.', annotations: [] }],
+    }
+    const functionCall = {
+      id: 'fc_streamed',
+      type: 'function_call',
+      status: 'completed',
+      call_id: 'call_streamed',
+      name: 'lookup',
+      arguments: '{"term":"moon"}',
+    }
+    const events = [
+      { type: 'response.output_item.done', output_index: 3, sequence_number: 1, item: functionCall },
+      { type: 'response.output_item.done', output_index: 1, sequence_number: 2, item: reasoning },
+      { type: 'response.output_item.done', output_index: 0, sequence_number: 3, item: configuration },
+      { type: 'response.output_item.done', output_index: 2, sequence_number: 4, item: message },
+      {
+        type: 'response.completed',
+        sequence_number: 5,
+        response: {
+          id: 'resp_streamed',
+          object: 'response',
+          created_at: 1,
+          status: 'completed',
+          error: null,
+          incomplete_details: null,
+          output: [],
+          model: officialModel.id,
+          usage: null,
+        },
+      },
+    ]
+    const bodies: Record<string, unknown>[] = []
+    const adapter = new ChatGptResponsesAdapter(hostFor(), {
+      fetch: eventFetch(events, (_request, body) => { bodies.push(body) }),
+    })
+    const prior = await assistantFromResponse(adapter)
+
+    await collect(adapter, options({
+      messages: [
+        { role: 'user', content: [{ type: 'text', text: 'First question.' }] },
+        prior,
+        { role: 'user', content: [{ type: 'text', text: 'Continue.' }] },
+      ],
+    }))
+
+    const secondInput = bodies[1]?.input as Array<Record<string, unknown>>
+    expect(secondInput.slice(-5)).toEqual([
+      configuration,
+      reasoning,
+      message,
+      functionCall,
+      { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'Continue.' }] },
+    ])
+  })
+
+  it('uses terminal response output when no output_item.done events were streamed', async () => {
+    const events = completedTextEvents('Terminal answer.')
+    const adapter = new ChatGptResponsesAdapter(hostFor(), {
+      fetch: eventFetch([events[0], events[1], events[3]]),
+    })
+
+    const chunks = await collect(adapter, options())
+
+    expect(chunks.at(-1)).toMatchObject({
+      type: 'finish',
+      replayState: { response: { output: [{ type: 'message', role: 'assistant' }] } },
+    })
+  })
+
+  it('rejects streamed output with a missing index instead of fabricating history', async () => {
+    const message = {
+      id: 'msg_gap',
+      type: 'message',
+      role: 'assistant',
+      status: 'completed',
+      content: [{ type: 'output_text', text: 'Answer.', annotations: [] }],
+    }
+    const events = [
+      { type: 'response.output_item.done', output_index: 1, sequence_number: 1, item: message },
+      {
+        type: 'response.completed',
+        sequence_number: 2,
+        response: {
+          id: 'resp_gap',
+          object: 'response',
+          created_at: 1,
+          status: 'completed',
+          error: null,
+          incomplete_details: null,
+          output: [],
+          model: officialModel.id,
+          usage: null,
+        },
+      },
+    ]
+    const adapter = new ChatGptResponsesAdapter(hostFor(), { fetch: eventFetch(events) })
+
+    await expect(collect(adapter, options())).rejects.toMatchObject({
+      code: 'MALFORMED_RESPONSE',
+      message: 'OpenAI Responses completed output items with a missing index',
+    })
+  })
+
+  it('rejects duplicate streamed output indices', async () => {
+    const message = {
+      id: 'msg_duplicate',
+      type: 'message',
+      role: 'assistant',
+      status: 'completed',
+      content: [{ type: 'output_text', text: 'Answer.', annotations: [] }],
+    }
+    const events = [
+      { type: 'response.output_item.done', output_index: 0, sequence_number: 1, item: message },
+      { type: 'response.output_item.done', output_index: 0, sequence_number: 2, item: message },
+      {
+        type: 'response.completed',
+        sequence_number: 3,
+        response: {
+          id: 'resp_duplicate',
+          object: 'response',
+          created_at: 1,
+          status: 'completed',
+          error: null,
+          incomplete_details: null,
+          output: [],
+          model: officialModel.id,
+          usage: null,
+        },
+      },
+    ]
+    const adapter = new ChatGptResponsesAdapter(hostFor(), { fetch: eventFetch(events) })
+
+    await expect(collect(adapter, options())).rejects.toMatchObject({
+      code: 'MALFORMED_RESPONSE',
+      message: 'OpenAI Responses completed the same output item index more than once',
+    })
+  })
+
   it('reports only sanitized item type names when response history cannot be replayed', async () => {
     const output = {
       id: 'private-response-item-id',
@@ -366,7 +522,7 @@ describe('ChatGPT Responses adapter', () => {
           status: 'completed',
           error: null,
           incomplete_details: null,
-          output: [message, output],
+          output: [],
           model: officialModel.id,
           usage: null,
         },

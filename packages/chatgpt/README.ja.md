@@ -124,7 +124,7 @@ system instructions は Responses の `instructions` に渡し、DSH メッセ�
 
 #### KV Cache への影響
 
-毎回、リクエスト履歴全体を OpenAI に送り、`previous_response_id` は使いません。Responses は `store: false` で実行し、暗号化 reasoning content も明示的に要求します。SDK が再利用できる完了済み response item は DSH の request state 内で保持します。インストール済み SDK が再利用できない item が応答に含まれる場合、item type 名だけを含む診断でリクエストを失敗させます。
+毎回、リクエスト履歴全体を OpenAI に送り、`previous_response_id` は使いません。Responses は `store: false` で実行し、暗号化 reasoning content も明示的に要求します。SDK が再利用できる `response.output_item.done` を output index 順に DSH の request state 内へ保存し、item 完了イベントが届かなかった場合のみ終端 `response.output` を使います。インストール済み SDK が再利用できない item が応答に含まれる場合、item type 名だけを含む診断でリクエストを失敗させます。
 
 ## 既知の制限
 

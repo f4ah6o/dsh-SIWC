@@ -62,6 +62,11 @@ interface ReplayScope {
   readonly accountId: string
 }
 
+interface CompletedStreamOutputItem {
+  readonly replayItem: ResponseInputItem | undefined
+  readonly typeName: string
+}
+
 type ResponsesReasoningEffort = NonNullable<NonNullable<ResponseCreateParamsStreaming['reasoning']>['effort']>
 
 /** Stream OpenAI Responses calls through one host-pinned account and token. */
@@ -430,7 +435,7 @@ async function* translateEvents(
   const blocksByItemId = new Map<string, StreamBlock>()
   let nextIndex = 0
   let completed = false
-  const completedOutputItems = new Map<number, ResponseInputItem>()
+  const completedOutputItems = new Map<number, CompletedStreamOutputItem>()
 
   const start = (key: string, type: StreamBlock['type'], itemId?: string): StreamBlock => {
     let block = blocks.get(key)
@@ -543,8 +548,17 @@ async function* translateEvents(
       }
       case 'response.output_item.done': {
         const item = event.item
+        if (!Number.isSafeInteger(event.output_index) || event.output_index < 0) {
+          throw new LlmError('OpenAI Responses completed an output item with an invalid index', 'MALFORMED_RESPONSE')
+        }
+        if (completedOutputItems.has(event.output_index)) {
+          throw new LlmError('OpenAI Responses completed the same output item index more than once', 'MALFORMED_RESPONSE')
+        }
         const replayItem = replayableOutputItem(item)
-        if (replayItem !== undefined) completedOutputItems.set(event.output_index, replayItem)
+        completedOutputItems.set(event.output_index, {
+          replayItem,
+          typeName: outputTypeName(item),
+        })
         if (item.type === 'function_call') {
           const itemId = item.id ?? item.call_id
           let block = blocksByItemId.get(itemId)
@@ -637,10 +651,20 @@ async function* translateEvents(
         if (blocks.size === 0) throw new LlmError(`OpenAI model "${replayScope.model}" returned no content`, 'EMPTY_RESPONSE')
         const replayItems: ResponseInputItem[] = []
         const unsupportedOutputTypes: string[] = []
-        for (const [index, item] of event.response.output.entries()) {
-          const replayItem = completedOutputItems.get(index) ?? replayableOutputItem(item)
-          if (replayItem === undefined) unsupportedOutputTypes.push(outputTypeName(item))
-          else replayItems.push(replayItem)
+        const streamedOutputItems = completedOutputItems.size > 0
+          ? orderedCompletedOutputItems(completedOutputItems)
+          : undefined
+        if (streamedOutputItems !== undefined) {
+          validateTerminalOutputSummary(streamedOutputItems, event.response.output)
+        }
+        const outputItems = streamedOutputItems
+          ?? event.response.output.map(item => ({
+            replayItem: replayableOutputItem(item),
+            typeName: outputTypeName(item),
+          }))
+        for (const item of outputItems) {
+          if (item.replayItem === undefined) unsupportedOutputTypes.push(item.typeName)
+          else replayItems.push(item.replayItem)
         }
         if (unsupportedOutputTypes.length > 0) {
           throw unsupportedReplayOutputError(unsupportedOutputTypes)
@@ -650,7 +674,7 @@ async function* translateEvents(
         }
         const usage = mapUsage(event.response.usage)
         if (usage !== undefined) yield { type: 'usage', usage }
-        const hadToolCall = event.response.output.some(item => item.type === 'function_call')
+        const hadToolCall = replayItems.some(item => item.type === 'function_call')
         yield {
           type: 'finish',
           reason: hadToolCall ? { kind: 'tool-calls' } : { kind: 'stop' },
@@ -694,6 +718,34 @@ function replayableOutputItem(item: ResponseOutputItem): ResponseInputItem | und
   } catch (error: unknown) {
     if (error instanceof TypeError) return undefined
     throw error
+  }
+}
+
+function orderedCompletedOutputItems(
+  items: ReadonlyMap<number, CompletedStreamOutputItem>,
+): readonly CompletedStreamOutputItem[] {
+  const ordered = [...items.entries()].sort(([left], [right]) => left - right)
+  return ordered.map(([index, item], expectedIndex) => {
+    if (index !== expectedIndex) {
+      throw new LlmError('OpenAI Responses completed output items with a missing index', 'MALFORMED_RESPONSE')
+    }
+    return item
+  })
+}
+
+function validateTerminalOutputSummary(
+  streamedItems: readonly CompletedStreamOutputItem[],
+  terminalItems: readonly ResponseOutputItem[],
+): void {
+  if (terminalItems.length === 0) return
+  if (terminalItems.length !== streamedItems.length) {
+    throw new LlmError('OpenAI Responses terminal output does not match streamed output items', 'MALFORMED_RESPONSE')
+  }
+  for (const [index, streamedItem] of streamedItems.entries()) {
+    const terminalItem = terminalItems[index]
+    if (terminalItem === undefined || outputTypeName(terminalItem) !== streamedItem.typeName) {
+      throw new LlmError('OpenAI Responses terminal output does not match streamed output items', 'MALFORMED_RESPONSE')
+    }
   }
 }
 
