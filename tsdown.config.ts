@@ -12,7 +12,7 @@ const hostNeverBundle = new Set([
 ])
 
 export default defineConfig({
-  entry: ['packages/chatgpt/lib/types/index.js'],
+  entry: ['packages/chatgpt/lib/types/index.js', 'packages/chatgpt/lib/types/preflight.js'],
   format: 'esm',
   platform: 'node',
   target: 'es2024',

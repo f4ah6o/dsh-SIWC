@@ -36,7 +36,7 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 The bundle inserts the ChatGPT plugin row. Remove it with `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt`. The package has not been published to npm yet. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1`; other DSH API versions are not covered.
 
-The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`. The standalone `sdk-minimal` profile omits Credentials and Authorization. Add matching provider packages to that profile, then add their rows to its `cordis.patch.yml`:
+The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`. The bundle also inserts a startup check. When the DSH launcher signals readiness, the check reports missing services for an enabled ChatGPT Host row and aborts startup; it skips a disabled or deleted Host row. The standalone `sdk-minimal` profile omits Credentials and Authorization. Add matching provider packages to that profile, then add their rows to its `cordis.patch.yml`:
 
 ```sh
 pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
@@ -52,7 +52,7 @@ Use `0.2.1-alpha.1` for both packages when the DSH installation is `0.2.1-alpha.
       name: '@deepseek-ai/dsh-credentials-local'
 ```
 
-The ChatGPT Host remains pending until Credentials, Authorization, and LLM are available. The bundle does not replace provider rows in base-backed profiles.
+The bundle does not replace provider rows in base-backed profiles.
 
 ### Sign in on the local machine
 
@@ -106,7 +106,7 @@ The settings page can write these overrides to the profile. Unknown models witho
 <details>
 <summary>Implementation details — click to expand</summary>
 
-The bundle mounts a Host OAuth/account service, a typed Remote namespace, and a lazy Client factory. The Host owns loopback callbacks, dynamic registration identity, serialized token refresh, model catalog admission, and the OpenAI Responses adapter. Remote values contain account status, catalog metadata, and sanitized login progress only. A request pins one account, access token, model configuration, and timeout before it enters the Responses stream.
+The bundle mounts a Host OAuth/account service, a profile-startup check, a typed Remote namespace, and a lazy Client factory. The Host owns loopback callbacks, dynamic registration identity, serialized token refresh, model catalog admission, and the OpenAI Responses adapter. The check uses the DSH launcher's readiness signal and public Loader entries to validate only an enabled ChatGPT Host row. Remote values contain account status, catalog metadata, and sanitized login progress only. A request pins one account, access token, model configuration, and timeout before it enters the Responses stream.
 
 OpenAI receives the current request’s instructions, conversation messages, image inputs, and function schemas. Requests use `store: false` and stream the full conversation. The package does not upload Session export files; model inference still sends the current request contents to OpenAI and is separate from DSH's session-log upload setting.
 

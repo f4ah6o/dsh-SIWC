@@ -27,6 +27,7 @@
   },
   "include": [
     "src/index.ts",
+    "src/preflight.ts",
     "src/types.ts",
     "src/config.ts",
     "src/oauth.ts",

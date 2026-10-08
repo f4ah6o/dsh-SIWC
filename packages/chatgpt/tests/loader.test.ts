@@ -4,14 +4,56 @@ import { join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import AuthorizationService from '@deepseek-ai/dsh-authorization'
+import type { AppReady } from '@deepseek-ai/dsh-cmdline'
 import LocalCredentialProvider from '@deepseek-ai/dsh-credentials-local'
 import { LlmRuntime } from '@deepseek-ai/dsh-llm'
 import { exportJWK, generateKeyPair, SignJWT } from 'jose'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as chatGptPlugin from '../lib/index.js'
+import * as chatGptPreflight from '../lib/preflight.js'
 
 const homes: string[] = []
 const contexts: Context[] = []
+
+interface TestReadiness extends AppReady {
+  /** Commit startup readiness and invoke the current one-shot listeners. */
+  commit(): void
+}
+
+function createReadiness(): TestReadiness {
+  const listeners = new Set<() => void>()
+  return {
+    onReady(listener) {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    commit() {
+      const pending = [...listeners]
+      for (const listener of pending) {
+        listeners.delete(listener)
+        listener()
+      }
+    },
+  }
+}
+
+async function createPreflightProfile(): Promise<{ ctx: Context; readiness: TestReadiness }> {
+  const ctx = new Context()
+  contexts.push(ctx)
+  const readiness = createReadiness()
+  ctx.provide('appReady', readiness)
+  await ctx.plugin(Loader)
+  ctx.loader.internal = {
+    import: async (specifier: string) => {
+      if (specifier === '@f4ah6o/dsh-chatgpt') return chatGptPlugin
+      if (specifier === '@f4ah6o/dsh-chatgpt/preflight') return chatGptPreflight
+      throw new Error(`unexpected profile plugin: ${specifier}`)
+    },
+  } as never
+  await ctx.loader.create({ name: '@f4ah6o/dsh-chatgpt/preflight' })
+  await ctx.loader.await()
+  return { ctx, readiness }
+}
 
 describe('ChatGPT Host Loader integration', () => {
   afterEach(async () => {
@@ -165,5 +207,40 @@ describe('ChatGPT Host Loader integration', () => {
       accounts: [{ status: 'connected', email: 'cli-user@example.test' }],
     })
     expect(JSON.stringify(await ctx.chatgptController.getState())).not.toContain('cli-access-token')
+  })
+
+  it('fails launcher readiness when an enabled Host entry lacks required services', async () => {
+    const { ctx, readiness } = await createPreflightProfile()
+    await ctx.loader.create({ name: '@f4ah6o/dsh-chatgpt' })
+    await ctx.loader.await()
+
+    expect(() => readiness.commit()).toThrow('ChatGPT requires services: credentials, authorization, llm')
+  })
+
+  it('skips the service check when the Host entry is deleted or disabled', async () => {
+    const { ctx, readiness } = await createPreflightProfile()
+    const deleted = await ctx.loader.create({ name: '@f4ah6o/dsh-chatgpt' })
+    ctx.loader.remove(deleted)
+    await ctx.loader.create({ name: '@f4ah6o/dsh-chatgpt', disabled: true })
+    await ctx.loader.await()
+
+    expect(() => readiness.commit()).not.toThrow()
+  })
+
+  it('accepts an enabled Host entry after its real DSH providers activate', async () => {
+    const { ctx, readiness } = await createPreflightProfile()
+    const entryId = await ctx.loader.create({ name: '@f4ah6o/dsh-chatgpt' })
+    await ctx.loader.await()
+
+    const home = await mkdtemp(join(tmpdir(), 'dsh-chatgpt-preflight-'))
+    homes.push(home)
+    await ctx.plugin(LocalCredentialProvider, { path: join(home, '.credentials.yaml'), watch: false })
+    await ctx.plugin(AuthorizationService)
+    await ctx.plugin(LlmRuntime)
+    await ctx.loader.await()
+
+    const entry = ctx.loader.resolve(entryId)
+    expect(entry.fiber?.state).toBe(2)
+    expect(() => readiness.commit()).not.toThrow()
   })
 })

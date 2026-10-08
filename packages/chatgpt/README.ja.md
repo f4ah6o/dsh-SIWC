@@ -36,7 +36,7 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 bundle が ChatGPT plugin 行を追加します。削除する場合は `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` を実行します。npm にはまだ公開されていません。Host API の対応確認済み DSH バージョンは `0.2.0-rc.2` と `0.2.1-alpha.1` です。
 
-Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含みます。独立した `sdk-minimal` profile には Credentials と Authorization がありません。該当 profile に DSH と同じバージョンの provider package を追加し、`cordis.patch.yml` に entry を追加します。
+Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含みます。bundle は起動チェックも追加します。DSH launcher の readiness 通知時に、有効な ChatGPT Host entry の不足サービスを報告して起動を失敗させます。Host entry が無効または削除済みならチェックを省略します。独立した `sdk-minimal` profile には Credentials と Authorization がありません。該当 profile に DSH と同じバージョンの provider package を追加し、`cordis.patch.yml` に entry を追加します。
 
 ```sh
 pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
@@ -52,7 +52,7 @@ DSH が `0.2.1-alpha.1` の場合は両方の package に `0.2.1-alpha.1` を使
       name: '@deepseek-ai/dsh-credentials-local'
 ```
 
-Credentials、Authorization、LLM が利用可能になるまで、ChatGPT Host は pending のままです。bundle は `dsh-base` を使う profile の provider entry を置き換えません。
+bundle は `dsh-base` を使う profile の provider entry を置き換えません。
 
 ### ローカル PC でサインイン
 
@@ -92,7 +92,7 @@ GPT-6 Sol、GPT-6 Luna、GPT-5.6 Sol、GPT-5.6 Terra、GPT-5.6 Luna の5モデ�
 <details>
 <summary>実装の詳細 — クリックして展開</summary>
 
-bundle は Host OAuth/account サービス、型付き Remote namespace、遅延 Client factory を追加します。Host が loopback callback、動的登録の identity、直列化した token refresh、model catalog の admission、OpenAI Responses adapter を管理します。Remote に渡るのは、アカウント状態、catalog 情報、安全化したログイン進捗だけです。各リクエストはアカウント、access token、model 設定、timeout を事前に固定します。
+bundle は Host OAuth/account サービス、profile 起動チェック、型付き Remote namespace、遅延 Client factory を追加します。起動チェックは DSH launcher の readiness 通知と公開 Loader entry を使い、有効な ChatGPT Host entry だけを検証します。Host が loopback callback、動的登録の identity、直列化した token refresh、model catalog の admission、OpenAI Responses adapter を管理します。Remote に渡るのは、アカウント状態、catalog 情報、安全化したログイン進捗だけです。各リクエストはアカウント、access token、model 設定、timeout を事前に固定します。
 
 OpenAI には各推論リクエストの instructions、会話、画像入力、function schema を送ります。API リクエストは `store: false` で全履歴を stream します。本パッケージは Session export ファイルをアップロードしません。推論では各リクエストの内容を OpenAI に送信し、これは DSH の Session log upload 設定とは独立しています。
 

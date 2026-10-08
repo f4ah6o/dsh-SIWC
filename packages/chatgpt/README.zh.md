@@ -36,7 +36,7 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 bundle 会添加 ChatGPT plugin 配置项。运行 `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` 可移除该项。本包尚未发布到 npm。已验证的 DSH Host API 版本为 `0.2.0-rc.2` 和 `0.2.1-alpha.1`。
 
-Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务。独立的 `sdk-minimal` profile 不包含 Credentials 和 Authorization。请在该 profile 中安装与 DSH 版本匹配的 provider package，并在其 `cordis.patch.yml` 中添加对应 entry：
+Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务。bundle 还会添加启动检查。DSH launcher 发出 readiness 信号时，检查会报告启用的 ChatGPT Host entry 缺少哪些服务并中止启动；如果 Host entry 已禁用或删除，则跳过检查。独立的 `sdk-minimal` profile 不包含 Credentials 和 Authorization。请在该 profile 中安装与 DSH 版本匹配的 provider package，并在其 `cordis.patch.yml` 中添加对应 entry：
 
 ```sh
 pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
@@ -52,7 +52,7 @@ pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-a
       name: '@deepseek-ai/dsh-credentials-local'
 ```
 
-Credentials、Authorization 和 LLM 服务可用前，ChatGPT Host 会保持 pending 状态。bundle 不会替换 base-backed profile 中的 provider entry。
+bundle 不会替换 base-backed profile 中的 provider entry。
 
 ### 在本机登录
 
@@ -92,7 +92,7 @@ GPT-6 Sol、GPT-6 Luna、GPT-5.6 Sol、GPT-5.6 Terra 和 GPT-5.6 Luna 这五个�
 <details>
 <summary>实现细节——点击展开</summary>
 
-bundle 会加载 Host OAuth/账号服务、类型化 Remote namespace 和延迟加载的 Client factory。Host 管理 loopback callback、动态注册身份、串行 token 刷新、模型 catalog 准入和 OpenAI Responses adapter。Remote 只传递账号状态、catalog 元数据和脱敏后的登录进度。每个请求在开始时固定账号、access token、模型配置和超时。
+bundle 会加载 Host OAuth/账号服务、profile 启动检查、类型化 Remote namespace 和延迟加载的 Client factory。启动检查使用 DSH launcher readiness 信号和公开 Loader entry，只验证启用的 ChatGPT Host entry。Host 管理 loopback callback、动态注册身份、串行 token 刷新、模型 catalog 准入和 OpenAI Responses adapter。Remote 只传递账号状态、catalog 元数据和脱敏后的登录进度。每个请求在开始时固定账号、access token、模型配置和超时。
 
 OpenAI 会收到当前推理请求的 instructions、对话消息、图片输入和 function schema。API 请求使用 `store: false` 并流式传输完整对话。本包不会上传 Session 导出文件；推理仍会将当前请求内容发送给 OpenAI，并且与 DSH 的 session-log 上传设置相互独立。
 
