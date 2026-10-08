@@ -36,15 +36,7 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 bundle 会添加 ChatGPT plugin 配置项。运行 `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` 可移除该项。本包尚未发布到 npm。已验证的 DSH Host API 版本为 `0.2.0-rc.2` 和 `0.2.1-alpha.1`。
 
-Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务。独立 `sdk-minimal` profile 缺少 Credentials 和 Authorization，使用本包前需要在 profile 中添加：
-
-```yaml
-- insert:
-    - id: credentials
-      name: '@deepseek-ai/dsh-credentials-local'
-    - id: authorization
-      name: '@deepseek-ai/dsh-authorization'
-```
+Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务；本 bundle 不会修改这些标准 entry 及其配置。对于独立的 `sdk-minimal` profile，bundle 会通过独立 profile entry 添加真正的 Authorization 和本地 Credentials provider，以提供 Host 所需服务。后续 profile patch 仍可替换或禁用任一 entry。
 
 ### 在本机登录
 
@@ -72,7 +64,7 @@ dsh --profile headless --patch /tmp/chatgpt-login.patch.yml "运行一个使用 
 
 设置页面展示 OpenAI 标记为 `visibility: "list"` 的所有目录模型，并保留精确的 `slug` 和 `display_name`。Provider 只会公布已知 context window 的模型。初始元数据覆盖官方文档中的七个精确 slug：[GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol)、[GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna)、[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra)、[GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol)、[GPT-5.6 Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol)、[GPT-5.6 Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra)、[GPT-5.6 Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna)。每个页面目前都列出 1,050,000 token context、128,000 token 最大输出、text/image 输入和 text 输出。最大输出仅作为目录元数据；adapter 不会将其作为输出上限发送。
 
-除 Astra 外的六个模型支持 `none`、`low`、`medium`、`high`、`xhigh`、`max` reasoning effort，默认值为 `medium`。Astra 支持 `low`、`medium`、`high`、`xhigh`、`max`，其官方页面没有列出默认值。[OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning) 提供其他模型的 `medium` 默认值。官方模型文档可能变化；这七个条目只是初始元数据，并不保证账号一定能使用它们。
+GPT-6 Sol、GPT-6 Luna、GPT-5.6 Sol、GPT-5.6 Terra 和 GPT-5.6 Luna 这五个模型支持 `none`、`low`、`medium`、`high`、`xhigh`、`max`，默认值为 `medium`。GPT-6.1 Sol 支持 `low`、`medium`、`high`、`xhigh`、`max`，默认值为 `medium`。Astra 也支持这五种 effort，但官方页面没有列出默认值。[OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning) 确认 GPT-6 Sol 和 Luna 的 `medium` 默认值。官方模型文档可能变化；这七个条目只是初始元数据，并不保证账号一定能使用它们。
 
 如果账号 catalog 出现新 slug 或 SIWC 能力不同，请在 profile 的 `modelOverrides` 中配置。每项可以设置 `contextWindow`、`inputModalities`、`reasoningEfforts` 和 `defaultReasoningEffort`。设置页面也可将覆盖值写入 profile。未知模型在设置页可见，但必须配置正数 `contextWindow` 后才能用于推理。
 

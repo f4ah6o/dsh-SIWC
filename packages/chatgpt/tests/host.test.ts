@@ -189,6 +189,87 @@ describe('ChatGPT Host account selection and request pinning', () => {
     expect(JSON.stringify(safeState)).not.toContain('new-refresh-token')
   })
 
+  it('returns the new login attempt when separate attempts share a millisecond timestamp', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, undefined)
+    await seedAccount(ctx, accountId, { token: 'timestamp-token' })
+    const frozen = vi.spyOn(Date, 'now').mockReturnValue(1234)
+    try {
+      const first = await host.beginLogin(accountId)
+      await host.cancelLogin(first.attemptId)
+      const second = await host.beginLogin(accountId)
+      expect(second.attemptId).not.toBe(first.attemptId)
+      await host.cancelLogin(second.attemptId)
+    } finally {
+      frozen.mockRestore()
+      await host.dispose()
+    }
+  })
+
+  it('rejects beginLogin when Host disposal cancels a flow before it creates an attempt', async () => {
+    const path = await home()
+    const { ctx, host } = await boot(path, undefined)
+    const originalRead = ctx.credentials.readRecord.bind(ctx.credentials)
+    let readStarted!: () => void
+    const started = new Promise<void>(resolve => { readStarted = resolve })
+    let releaseRead!: () => void
+    const release = new Promise<void>(resolve => { releaseRead = resolve })
+    const spy = vi.spyOn(ctx.credentials, 'readRecord').mockImplementation(async key => {
+      if (credentialKeyId(key).startsWith('account-')) {
+        readStarted()
+        await release
+      }
+      return await originalRead(key)
+    })
+    try {
+      const pending = host.beginLogin()
+      await started
+      await host.dispose()
+      releaseRead()
+      await expect(pending).rejects.toThrow()
+      expect(ctx.authorization.list()).toEqual([])
+    } finally {
+      releaseRead()
+      spy.mockRestore()
+    }
+  })
+
+  it('does not start a late reauthorization when sign-out races the account lookup', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, undefined)
+    await seedAccount(ctx, accountId, { token: 'signout-race-token' })
+    const originalRead = ctx.credentials.readRecord.bind(ctx.credentials)
+    let readStarted!: () => void
+    const started = new Promise<void>(resolve => { readStarted = resolve })
+    let releaseRead!: () => void
+    const release = new Promise<void>(resolve => { releaseRead = resolve })
+    const spy = vi.spyOn(ctx.credentials, 'readRecord').mockImplementation(async key => {
+      if (credentialKeyId(key) === String(accountId)) {
+        readStarted()
+        await release
+      }
+      return await originalRead(key)
+    })
+    vi.stubGlobal('fetch', async () => new Response(null, { status: 200 }))
+    try {
+      const pending = host.beginLogin(accountId)
+      const pendingRejection = expect(pending).rejects.toThrow(/cancelled/u)
+      await started
+      await host.signOut(accountId)
+      releaseRead()
+      await pendingRejection
+      expect((await host.getState()).loginAttempts).toEqual([])
+      const saved = await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', accountId))
+      expect(saved).toMatchObject({ payload: { status: 'needs-sign-in', grantGeneration: 1 } })
+    } finally {
+      releaseRead()
+      spy.mockRestore()
+      await host.dispose()
+    }
+  })
+
   it('retains verified client registration without persisting tokens when plan permission is missing', async () => {
     const path = await home()
     const { ctx, host } = await boot(path, undefined)
@@ -447,6 +528,38 @@ describe('ChatGPT Host account selection and request pinning', () => {
     expect(nextCall.accessToken).toBe('token-second')
     expect(nextCall.model.context?.contextWindow).toBe(2222)
     expect(nextCall.requestTimeoutMs).toBe(22_000)
+  })
+
+  it.each(['add', 'remove'] as const)('uses the captured model metadata when an override is %s during catalog lookup', async change => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host, overrides } = await boot(path, String(accountId))
+    await seedAccount(ctx, accountId, { token: 'metadata-token' })
+    const slug = change === 'add' ? 'gpt-6-astra' : 'unseeded-catalog-model'
+    if (change === 'remove') overrides.set([{ model: slug, contextWindow: 1111 }])
+    let requestStarted!: () => void
+    const started = new Promise<void>(resolve => { requestStarted = resolve })
+    let releaseCatalog!: () => void
+    const release = new Promise<void>(resolve => { releaseCatalog = resolve })
+    vi.stubGlobal('fetch', async () => {
+      requestStarted()
+      await release
+      return new Response(JSON.stringify({
+        models: [{ slug, display_name: 'Catalog Model', visibility: 'list' }],
+      }), { status: 200, headers: { 'content-type': 'application/json' } })
+    })
+
+    const pending = host.prepareCall(slug)
+    await started
+    overrides.set(change === 'add' ? [{ model: slug, contextWindow: 2222, inputModalities: ['text'] }] : [])
+    releaseCatalog()
+    if (change === 'add') {
+      await expect(pending).resolves.toMatchObject({
+        model: { context: { contextWindow: 1_050_000 }, inputModalities: ['text', 'image'] },
+      })
+    } else {
+      await expect(pending).resolves.toMatchObject({ model: { context: { contextWindow: 1111 } } })
+    }
   })
 
   it('refreshes the server catalog and prevents an older pending lookup from replacing it', async () => {

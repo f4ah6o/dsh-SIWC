@@ -36,15 +36,7 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 The bundle inserts the ChatGPT plugin row. Remove it with `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt`. The package has not been published to npm yet. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1`; other DSH API versions are not covered.
 
-The Host needs the DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include these through `dsh-base`. The standalone `sdk-minimal` profile does not include Credentials or Authorization. Add both providers to that profile before using this bundle:
-
-```yaml
-- insert:
-    - id: credentials
-      name: '@deepseek-ai/dsh-credentials-local'
-    - id: authorization
-      name: '@deepseek-ai/dsh-authorization'
-```
+The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`; this bundle leaves those standard entries and their configuration untouched. For the standalone `sdk-minimal` profile, the bundle adds the real Authorization and local Credentials providers under separate profile entries so the Host's required services are available. A profile patch applied after the bundle can replace or disable either entry.
 
 ### Sign in on the local machine
 
@@ -72,7 +64,7 @@ Account records and the stable Host ID live in `$DSH_HOME/.credentials.yaml`. Pr
 
 The settings page displays every catalog entry OpenAI marks `visibility: "list"`, using its exact `slug` and `display_name`. The provider only advertises models with a known context window. It seeds these seven exact model slugs from the linked official API documentation: [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol), [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna), [GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra), [GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol), [GPT-5.6 Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol), [GPT-5.6 Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra), and [GPT-5.6 Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna). Each page currently documents a 1,050,000-token context window, 128,000-token maximum output, text and image input, and text output. The maximum output is catalog metadata only; the adapter does not send it as an output cap.
 
-The six non-Astra model pages list `none`, `low`, `medium`, `high`, `xhigh`, and `max` reasoning efforts, with `medium` as the default. Astra lists `low`, `medium`, `high`, `xhigh`, and `max`; its page does not state a default. [OpenAI’s reasoning guide](https://developers.openai.com/api/docs/guides/reasoning) supplies the `medium` defaults for the non-Astra models. Model documentation can change; the seven rows are an initial metadata set, not an availability promise.
+Five non-Astra models—GPT-6 Sol, GPT-6 Luna, GPT-5.6 Sol, GPT-5.6 Terra, and GPT-5.6 Luna—list `none`, `low`, `medium`, `high`, `xhigh`, and `max` reasoning efforts, with `medium` as the default. GPT-6.1 Sol lists `low`, `medium`, `high`, `xhigh`, and `max`, with `medium` as the default. Astra lists the same five efforts, but its page does not state a default. [OpenAI’s reasoning guide](https://developers.openai.com/api/docs/guides/reasoning) confirms the `medium` defaults for GPT-6 Sol and Luna. Model documentation can change; the seven rows are an initial metadata set, not an availability promise.
 
 Use `modelOverrides` in profile config for an unknown exact catalog slug or an SIWC capability difference. Each row can set `contextWindow`, `inputModalities`, `reasoningEfforts`, and `defaultReasoningEffort`:
 

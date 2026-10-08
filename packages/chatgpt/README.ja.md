@@ -36,15 +36,7 @@ dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chat
 
 bundle が ChatGPT plugin 行を追加します。削除する場合は `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` を実行します。npm にはまだ公開されていません。Host API の対応確認済み DSH バージョンは `0.2.0-rc.2` と `0.2.1-alpha.1` です。
 
-Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含みます。単独の `sdk-minimal` profile には Credentials と Authorization がないため、profile に追加します。
-
-```yaml
-- insert:
-    - id: credentials
-      name: '@deepseek-ai/dsh-credentials-local'
-    - id: authorization
-      name: '@deepseek-ai/dsh-authorization'
-```
+Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含み、本 bundle は既存の標準 entry とその設定に触れません。独立した `sdk-minimal` profile には、Host の必須サービスを用意するため、bundle が実際の Authorization とローカル Credentials provider を別の profile entry として追加します。後から適用する profile patch で、どちらの entry も置き換えたり無効にしたりできます。
 
 ### ローカル PC でサインイン
 
@@ -72,7 +64,7 @@ dsh --profile headless --patch /tmp/chatgpt-login.patch.yml "ChatGPT を使う�
 
 設定画面は OpenAI が `visibility: "list"` とした全モデルを、正確な `slug` と `display_name` で表示します。推論用として公開するのは context window が既知のモデルだけです。初期メタデータは [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol)、[GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna)、[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra)、[GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol)、[GPT-5.6 Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol)、[GPT-5.6 Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra)、[GPT-5.6 Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna) の7つです。各ページには現時点で context 1,050,000 token、最大出力 128,000 token、text/image 入力、text 出力と記載されています。最大出力値はメタデータに限り、リクエストの出力上限には設定しません。
 
-Astra 以外の6モデルは reasoning effort に `none`、`low`、`medium`、`high`、`xhigh`、`max` があり、既定値は `medium` です。Astra は `low`、`medium`、`high`、`xhigh`、`max` をサポートし、公式ページに既定値の記載はありません。公式 [reasoning guide](https://developers.openai.com/api/docs/guides/reasoning) は Astra 以外の既定値を示しています。モデルの公式情報は変更される可能性があります。これら7行は初期メタデータで、利用可否を保証するものではありません。
+GPT-6 Sol、GPT-6 Luna、GPT-5.6 Sol、GPT-5.6 Terra、GPT-5.6 Luna の5モデルは `none`、`low`、`medium`、`high`、`xhigh`、`max` をサポートし、既定値は `medium` です。GPT-6.1 Sol は `low`、`medium`、`high`、`xhigh`、`max` をサポートし、既定値は `medium` です。Astra も同じ5段階をサポートしますが、公式ページに既定値の記載はありません。公式 [reasoning guide](https://developers.openai.com/api/docs/guides/reasoning) は GPT-6 Sol と Luna の `medium` 既定値を確認しています。モデルの公式情報は変更される可能性があります。これら7行は初期メタデータで、利用可否を保証するものではありません。
 
 未知の正確な catalog slug や SIWC アカウント固有の能力には、profile の `modelOverrides` を使います。各行には `contextWindow`、`inputModalities`、`reasoningEfforts`、`defaultReasoningEffort` を指定できます。設定画面から profile に保存することもできます。未知モデルは正の `contextWindow` を設定するまで、設定画面には表示されますが推論には選択できません。
 
