@@ -9,7 +9,7 @@ import { exportJWK, generateKeyPair, SignJWT } from 'jose'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ChatGptHost } from '../src/host.js'
 import type { Config } from '../src/config.js'
-import type { ChatGptAccountId } from '../src/types.js'
+import type { ChatGptAccountId, ChatGptModelOverride } from '../src/types.js'
 
 const scopes = ['openid', 'profile', 'email', 'offline_access', 'resource.invoke', 'chatgpt.tokens.use.direct']
 const homes: string[] = []
@@ -20,16 +20,25 @@ function mutable<T>(initial: T): { get(): T; set(value: T): void } {
   return { get: () => value, set: next => { value = next } }
 }
 
-function config(activeAccountId: string | undefined): { readonly config: Config; readonly active: ReturnType<typeof mutable<string | undefined>> } {
+function config(activeAccountId: string | undefined): {
+  readonly config: Config
+  readonly active: ReturnType<typeof mutable<string | undefined>>
+  readonly overrides: ReturnType<typeof mutable<ChatGptModelOverride[]>>
+  readonly timeouts: ReturnType<typeof mutable<number>>
+} {
   const active = mutable(activeAccountId)
+  const overrides = mutable<ChatGptModelOverride[]>([])
+  const timeouts = mutable(10_000)
   return {
     active,
+    overrides,
+    timeouts,
     config: {
       activeAccountId: active,
       welcomeAcknowledged: mutable(false),
       authorizeOnStart: mutable(false),
-      modelOverrides: mutable([]),
-      requestTimeoutMs: mutable(10_000),
+      modelOverrides: overrides,
+      requestTimeoutMs: timeouts,
       loginPollIntervalMs: mutable(1_000),
       loginTimeoutMs: mutable(30_000),
     },
@@ -46,6 +55,8 @@ async function boot(path: string, selected: string | undefined): Promise<{
   readonly ctx: Context
   readonly host: ChatGptHost
   readonly active: ReturnType<typeof mutable<string | undefined>>
+  readonly overrides: ReturnType<typeof mutable<ChatGptModelOverride[]>>
+  readonly timeouts: ReturnType<typeof mutable<number>>
 }> {
   const ctx = new Context()
   contexts.push(ctx)
@@ -54,7 +65,7 @@ async function boot(path: string, selected: string | undefined): Promise<{
   const refs = config(selected)
   const host = new ChatGptHost(ctx, refs.config)
   await host.initialize()
-  return { ctx, host, active: refs.active }
+  return { ctx, host, active: refs.active, overrides: refs.overrides, timeouts: refs.timeouts }
 }
 
 function newAccountId(): ChatGptAccountId {
@@ -87,7 +98,7 @@ async function seedAccount(
 
 function catalogResponse(displayName: string): Response {
   return new Response(JSON.stringify({
-    models: [{ id: 'gpt-6-astra', display_name: displayName, visibility: 'list' }],
+    models: [{ slug: 'gpt-6-astra', display_name: displayName, visibility: 'list' }],
   }), { status: 200, headers: { 'content-type': 'application/json' } })
 }
 
@@ -172,10 +183,205 @@ describe('ChatGPT Host account selection and request pinning', () => {
       refreshToken: 'new-refresh-token',
       status: 'connected',
     } })
-    expect(ctx.authorization.list()).toEqual([])
+    expect(ctx.authorization.list()).toHaveLength(1)
     const safeState = await host.getState()
     expect(JSON.stringify(safeState)).not.toContain('new-access-token')
     expect(JSON.stringify(safeState)).not.toContain('new-refresh-token')
+  })
+
+  it('retains verified client registration without persisting tokens when plan permission is missing', async () => {
+    const path = await home()
+    const { ctx, host } = await boot(path, undefined)
+    const ticket = await host.beginLogin()
+    const authorize = new URL(ticket.authorizationUrl)
+    const redirect = authorize.searchParams.get('redirect_uri')
+    const state = authorize.searchParams.get('state')
+    const nonce = authorize.searchParams.get('nonce')
+    if (redirect === null || state === null || nonce === null) throw new Error('ChatGPT authorize request omitted a callback value')
+    const entry = ctx.authorization.list()[0]
+    if (entry === undefined) throw new Error('ChatGPT Host did not register its authorization flow.')
+    const accountId = credentialKeyId(entry.key)
+    const issuedClientId = 'issued-client-without-plan-scope'
+    const { privateKey, publicKey } = await generateKeyPair('ES256')
+    const publicJwk = await exportJWK(publicKey)
+    const idToken = await new SignJWT({ nonce, email: 'hiro@example.test', email_verified: true })
+      .setProtectedHeader({ alg: 'ES256', kid: 'limited-account-key' })
+      .setIssuer('https://auth.openai.com')
+      .setAudience(issuedClientId)
+      .setSubject('verified-limited-subject')
+      .setIssuedAt()
+      .setExpirationTime('5m')
+      .sign(privateKey)
+    const nativeFetch = globalThis.fetch
+    vi.stubGlobal('fetch', async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url === 'https://auth.openai.com/.well-known/openid-configuration') {
+        return new Response(JSON.stringify({
+          issuer: 'https://auth.openai.com',
+          jwks_uri: 'https://auth.openai.com/.well-known/jwks.json',
+          revocation_endpoint: 'https://auth.openai.com/api/accounts/oauth/revoke',
+        }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      if (url === 'https://auth.openai.com/api/accounts/oauth/token') {
+        return new Response(JSON.stringify({
+          access_token: 'limited-access-token',
+          refresh_token: 'limited-refresh-token',
+          id_token: idToken,
+          token_type: 'Bearer',
+          expires_in: 3_600,
+          scope: 'openid profile email offline_access resource.invoke',
+        }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      if (url === 'https://auth.openai.com/.well-known/jwks.json') {
+        return new Response(JSON.stringify({ keys: [{ ...publicJwk, kid: 'limited-account-key', alg: 'ES256', use: 'sig' }] }), {
+          status: 200, headers: { 'content-type': 'application/json' },
+        })
+      }
+      throw new Error(`unexpected OAuth URL: ${url}`)
+    })
+
+    const callback = new URL(redirect)
+    callback.searchParams.set('state', state)
+    callback.searchParams.set('code', 'limited-permission-code')
+    callback.searchParams.set('client_id', issuedClientId)
+    await expect(nativeFetch(callback)).resolves.toMatchObject({ status: 400 })
+    await expect(host.waitForLogin(ticket.attemptId)).rejects.toThrow(/permissions needed/u)
+
+    const saved = await ctx.credentials.readRecord(entry.key)
+    expect(saved).toMatchObject({ payload: {
+      accountId,
+      clientId: issuedClientId,
+      subject: 'verified-limited-subject',
+      email: 'hiro@example.test',
+      status: 'needs-sign-in',
+    } })
+    if (saved?.kind !== 'grant') throw new Error('The incomplete ChatGPT registration was not saved.')
+    expect(saved.payload).not.toHaveProperty('accessToken')
+    expect(saved.payload).not.toHaveProperty('refreshToken')
+    expect(saved.payload).not.toHaveProperty('idToken')
+    await expect(host.listModels()).rejects.toMatchObject({ code: 'CHATGPT_SIGN_IN_REQUIRED' })
+  })
+
+  it('preserves the previous connected grant when reauthorization omits plan permission', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, undefined)
+    await seedAccount(ctx, accountId, { token: 'original-access-token' })
+    const ticket = await host.beginLogin(accountId)
+    const authorize = new URL(ticket.authorizationUrl)
+    const redirect = authorize.searchParams.get('redirect_uri')
+    const state = authorize.searchParams.get('state')
+    const nonce = authorize.searchParams.get('nonce')
+    const clientId = authorize.searchParams.get('client_id')
+    if (redirect === null || state === null || nonce === null || clientId === null) {
+      throw new Error('ChatGPT reauthorization URL omitted a required callback value')
+    }
+    const { privateKey, publicKey } = await generateKeyPair('ES256')
+    const publicJwk = await exportJWK(publicKey)
+    const idToken = await new SignJWT({ nonce, email: 'hiro@example.test', email_verified: true })
+      .setProtectedHeader({ alg: 'ES256', kid: 'reauth-limited-key' })
+      .setIssuer('https://auth.openai.com')
+      .setAudience(clientId)
+      .setSubject(`subject-${accountId}`)
+      .setIssuedAt()
+      .setExpirationTime('5m')
+      .sign(privateKey)
+    const nativeFetch = globalThis.fetch
+    vi.stubGlobal('fetch', async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url === 'https://auth.openai.com/.well-known/openid-configuration') {
+        return new Response(JSON.stringify({
+          issuer: 'https://auth.openai.com',
+          jwks_uri: 'https://auth.openai.com/.well-known/jwks.json',
+          revocation_endpoint: 'https://auth.openai.com/api/accounts/oauth/revoke',
+        }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      if (url === 'https://auth.openai.com/api/accounts/oauth/token') {
+        return new Response(JSON.stringify({
+          access_token: 'limited-reauthorization-access-token',
+          refresh_token: 'limited-reauthorization-refresh-token',
+          id_token: idToken,
+          token_type: 'Bearer',
+          expires_in: 3_600,
+          scope: 'openid profile email offline_access resource.invoke',
+        }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      if (url === 'https://auth.openai.com/.well-known/jwks.json') {
+        return new Response(JSON.stringify({ keys: [{ ...publicJwk, kid: 'reauth-limited-key', alg: 'ES256', use: 'sig' }] }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+      throw new Error(`unexpected OAuth URL: ${url}`)
+    })
+
+    const callback = new URL(redirect)
+    callback.searchParams.set('state', state)
+    callback.searchParams.set('code', 'limited-reauthorization-code')
+    callback.searchParams.set('client_id', clientId)
+    await expect(nativeFetch(callback)).resolves.toMatchObject({ status: 400 })
+    await expect(host.waitForLogin(ticket.attemptId)).rejects.toThrow(/permissions needed/u)
+    await expect(ctx.credentials.readRecord(credentialKey('dsh-chatgpt', accountId))).resolves.toMatchObject({ payload: {
+      status: 'connected',
+      accessToken: 'original-access-token',
+      refreshToken: 'refresh-original-access-token',
+    } })
+    const stateView = await host.getState()
+    expect(JSON.stringify(stateView)).not.toContain('limited-reauthorization-access-token')
+    expect(JSON.stringify(stateView)).not.toContain('limited-reauthorization-refresh-token')
+  })
+
+  it('rejects the dynamic-client placeholder instead of saving it as an issued registration', async () => {
+    const path = await home()
+    const { ctx, host } = await boot(path, undefined)
+    const ticket = await host.beginLogin()
+    const authorize = new URL(ticket.authorizationUrl)
+    const redirect = authorize.searchParams.get('redirect_uri')
+    const state = authorize.searchParams.get('state')
+    if (redirect === null || state === null) throw new Error('ChatGPT authorize request omitted a callback value')
+    const entry = ctx.authorization.list()[0]
+    if (entry === undefined) throw new Error('ChatGPT Host did not register its authorization flow.')
+    const callback = new URL(redirect)
+    callback.searchParams.set('state', state)
+    callback.searchParams.set('code', 'unissued-dynamic-client-code')
+    callback.searchParams.set('client_id', 'dynamic_agent_client')
+    const response = await globalThis.fetch(callback)
+    expect(response.status).toBe(400)
+    await expect(response.text()).resolves.toMatch(/did not issue a client registration/u)
+    await expect(host.waitForLogin(ticket.attemptId)).rejects.toThrow(/did not issue/u)
+    await expect(ctx.credentials.readRecord(entry.key)).resolves.toBeUndefined()
+  })
+
+  it('re-registers saved account authorization flows after restart and lets public callers cancel them', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const first = await boot(path, undefined)
+    await seedAccount(first.ctx, accountId, { token: 'persisted-token' })
+    await first.host.dispose()
+    await first.ctx.fiber.dispose()
+
+    const { ctx, host } = await boot(path, undefined)
+    const key = credentialKey('dsh-chatgpt', accountId)
+    expect(ctx.authorization.list()).toContainEqual(expect.objectContaining({ key, label: 'ChatGPT' }))
+    let publish!: (url: string) => void
+    const authorizeReady = new Promise<string>(resolve => { publish = resolve })
+    const controller = new AbortController()
+    const running = ctx.authorization.begin({
+      key,
+      signal: controller.signal,
+      interaction: {
+        notify: notice => { if (notice.url !== undefined) publish(notice.url) },
+        prompt: async () => { throw new Error('ChatGPT does not request a prompt value') },
+      },
+    })
+    const authorize = new URL(await authorizeReady)
+    expect(authorize.searchParams.get('client_id')).toBe(`client-${accountId}`)
+    expect(authorize.searchParams.get('redirect_uri')).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/auth\/callback$/u)
+    controller.abort()
+    await expect(running).resolves.toEqual({ status: 'cancelled' })
+    expect(ctx.authorization.list()).toContainEqual(expect.objectContaining({ key, label: 'ChatGPT' }))
+    await expect(ctx.credentials.readRecord(key)).resolves.toMatchObject({ payload: { status: 'connected', accessToken: 'persisted-token' } })
+    await host.dispose()
   })
 
   it('uses the sole connected account but requires a choice among multiple accounts or a missing saved selection', async () => {
@@ -203,13 +409,15 @@ describe('ChatGPT Host account selection and request pinning', () => {
     const path = await home()
     const firstId = newAccountId()
     const secondId = newAccountId()
-    const { ctx, host, active } = await boot(path, String(firstId))
+    const { ctx, host, active, overrides, timeouts } = await boot(path, String(firstId))
     await seedAccount(ctx, firstId, { token: 'token-first', createdAt: 1 })
     await seedAccount(ctx, secondId, { token: 'token-second', createdAt: 2 })
     let started!: () => void
     const firstRequestStarted = new Promise<void>(resolve => { started = resolve })
     let release!: () => void
     const firstCatalogGate = new Promise<void>(resolve => { release = resolve })
+    overrides.set([{ model: 'gpt-6-astra', contextWindow: 1111 }])
+    timeouts.set(11_000)
     vi.stubGlobal('fetch', async (_input: RequestInfo | URL, init?: RequestInit) => {
       const authorization = new Headers(init?.headers).get('authorization')
       if (authorization === 'Bearer token-first') {
@@ -223,12 +431,22 @@ describe('ChatGPT Host account selection and request pinning', () => {
     const preparedCall = host.prepareCall('gpt-6-astra')
     await firstRequestStarted
     active.set(String(secondId))
+    overrides.set([{ model: 'gpt-6-astra', contextWindow: 2222 }])
+    timeouts.set(22_000)
     release()
     const call = await preparedCall
 
     expect(call.accountId).toBe(firstId)
     expect(call.accessToken).toBe('token-first')
     expect(call.model.name).toBe('First Astra')
+    expect(call.model.context?.contextWindow).toBe(1111)
+    expect(call.requestTimeoutMs).toBe(11_000)
+
+    const nextCall = await host.prepareCall('gpt-6-astra')
+    expect(nextCall.accountId).toBe(secondId)
+    expect(nextCall.accessToken).toBe('token-second')
+    expect(nextCall.model.context?.contextWindow).toBe(2222)
+    expect(nextCall.requestTimeoutMs).toBe(22_000)
   })
 
   it('refreshes the server catalog and prevents an older pending lookup from replacing it', async () => {
@@ -363,6 +581,104 @@ describe('ChatGPT Host account selection and request pinning', () => {
     expect(saved).toMatchObject({ payload: { status: 'needs-sign-in', grantGeneration: 1 } })
     if (saved?.kind !== 'grant') throw new Error('logged-out ChatGPT account record is missing')
     expect(saved.payload).not.toHaveProperty('refreshToken')
+  })
+
+  it('keeps cancellation effective while a real Credentials file lock blocks the grant write', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, String(accountId))
+    await seedAccount(ctx, accountId, { token: 'old-access-token' })
+    const key = credentialKey('dsh-chatgpt', accountId)
+    let releaseLock!: () => void
+    let lockEntered!: () => void
+    const lockReady = new Promise<void>(resolve => { lockEntered = resolve })
+    const lockGate = new Promise<void>(resolve => { releaseLock = resolve })
+    const heldWrite = ctx.credentials.modifyRecord(key, async current => {
+      lockEntered()
+      await lockGate
+      return current
+    })
+    await lockReady
+
+    let queuedWrite!: () => void
+    const writeQueued = new Promise<void>(resolve => { queuedWrite = resolve })
+    const originalModify = ctx.credentials.modifyRecord.bind(ctx.credentials)
+    vi.spyOn(ctx.credentials, 'modifyRecord').mockImplementation(async (recordKey, mutate) => {
+      if (recordKey === key) queuedWrite()
+      return await originalModify(recordKey, mutate)
+    })
+
+    const ticket = await host.beginLogin(accountId)
+    const authorize = new URL(ticket.authorizationUrl)
+    const redirect = authorize.searchParams.get('redirect_uri')
+    const state = authorize.searchParams.get('state')
+    const nonce = authorize.searchParams.get('nonce')
+    const clientId = authorize.searchParams.get('client_id')
+    if (redirect === null || state === null || nonce === null || clientId === null) {
+      throw new Error('ChatGPT authorize request omitted a required callback value')
+    }
+    const { privateKey, publicKey } = await generateKeyPair('ES256')
+    const publicJwk = await exportJWK(publicKey)
+    const idToken = await new SignJWT({ nonce })
+      .setProtectedHeader({ alg: 'ES256', kid: 'queued-write-key' })
+      .setIssuer('https://auth.openai.com')
+      .setAudience(clientId)
+      .setSubject(`subject-${accountId}`)
+      .setIssuedAt()
+      .setExpirationTime('5m')
+      .sign(privateKey)
+    const nativeFetch = globalThis.fetch
+    vi.stubGlobal('fetch', async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url === 'https://auth.openai.com/.well-known/openid-configuration') {
+        return new Response(JSON.stringify({
+          issuer: 'https://auth.openai.com',
+          jwks_uri: 'https://auth.openai.com/.well-known/jwks.json',
+          revocation_endpoint: 'https://auth.openai.com/api/accounts/oauth/revoke',
+        }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      if (url === 'https://auth.openai.com/api/accounts/oauth/token') {
+        return new Response(JSON.stringify({
+          access_token: 'new-access-token',
+          refresh_token: 'new-refresh-token',
+          id_token: idToken,
+          token_type: 'Bearer',
+          expires_in: 3_600,
+          scope: scopes.join(' '),
+        }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      if (url === 'https://auth.openai.com/.well-known/jwks.json') {
+        return new Response(JSON.stringify({ keys: [{ ...publicJwk, kid: 'queued-write-key', alg: 'ES256', use: 'sig' }] }), {
+          status: 200, headers: { 'content-type': 'application/json' },
+        })
+      }
+      throw new Error(`unexpected OAuth URL: ${url}`)
+    })
+
+    const callback = new URL(redirect)
+    callback.searchParams.set('state', state)
+    callback.searchParams.set('code', 'authorization-code-waiting-for-lock')
+    callback.searchParams.set('client_id', clientId)
+    const callbackResponse = nativeFetch(callback)
+    await writeQueued
+
+    let cancelSettled!: () => void
+    const authorizationSettled = new Promise<void>(resolve => { cancelSettled = resolve })
+    const unlisten = ctx.on('authorization/settled', (settledKey, status) => {
+      if (settledKey === key && status === 'cancelled') cancelSettled()
+    })
+    const cancel = host.cancelLogin(ticket.attemptId)
+    await authorizationSettled
+    releaseLock()
+    await heldWrite
+    await cancel
+    unlisten()
+    expect((await callbackResponse).status).toBe(400)
+    await expect(ctx.credentials.readRecord(key)).resolves.toMatchObject({ payload: {
+      status: 'connected',
+      accessToken: 'old-access-token',
+      refreshToken: 'refresh-old-access-token',
+    } })
   })
 
   it('serializes concurrent refreshes through the published file-backed Credentials provider', async () => {

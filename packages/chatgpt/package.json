@@ -56,7 +56,10 @@
     "lib/typert.host.d.ts",
     "lib/typert.remote-client.js",
     "lib/typert.remote-client.d.ts",
-    "cordis.patch.yml"
+    "cordis.patch.yml",
+    "README.md",
+    "README.ja.md",
+    "README.zh.md"
   ],
   "scripts": {
     "build": "pnpm --dir ../.. run build",

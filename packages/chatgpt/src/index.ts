@@ -106,13 +106,14 @@ export class ChatGptController extends TypertRemoteService {
 /** Register the ChatGPT adapter and profile account service. */
 export async function apply(ctx: Context, config: PluginConfig): Promise<void> {
   const host = new ChatGptHost(ctx, config)
-  await host.initialize()
-  await ctx.plugin(ChatGptController, host)
-  const disposeAdapter = ctx.llm.registerAdapter(['chatgpt'], new ChatGptResponsesAdapter(host))
+  let disposeAdapter: () => void = () => undefined
   ctx.effect(() => async () => {
     disposeAdapter()
     await host.dispose()
   })
+  await host.initialize()
+  await ctx.plugin(ChatGptController, host)
+  disposeAdapter = ctx.llm.registerAdapter(['chatgpt'], new ChatGptResponsesAdapter(host))
   if (config.authorizeOnStart.get() && !(await host.hasConnectedAccount())) {
     const ticket = await host.beginLogin()
     ctx.logger.info(`ChatGPT sign-in requires a local browser. Open this URL, approve access, and wait for the callback: ${ticket.authorizationUrl}`)

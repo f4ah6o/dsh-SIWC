@@ -32,10 +32,17 @@ export interface OAuthIdentityExpectation {
   readonly subject: string
 }
 
-/** Validated claims and credentials produced by one successful callback exchange. */
-export interface OAuthCompletion {
-  readonly grant: OAuthGrant
+/** Verified registration identity retained when a callback grants no usable token. */
+export interface OAuthRegistration {
+  readonly clientId: string
+  readonly subject: string
+  readonly email?: string
 }
+
+/** Verified result of one callback exchange; incomplete grants never carry tokens. */
+export type OAuthCompletion =
+  | { readonly status: 'connected'; readonly grant: OAuthGrant }
+  | { readonly status: 'needs-sign-in'; readonly registration: OAuthRegistration; readonly missingScopes: readonly string[] }
 
 /** OAuth failure safe to classify without including credentials or response bodies. */
 export class OAuthError extends Error {
@@ -116,19 +123,28 @@ export async function exchangeAuthorizationCode(input: {
   })
   const body = await responseObject(response)
   if (!response.ok) throw oauthResponseError(response.status, body, 'ChatGPT token exchange failed')
-  const tokens = tokenResponse(body)
-  const scopes = splitScopes(tokens.scope)
-  assertRequiredScopes(scopes)
-  const refreshToken = tokens.refresh_token
+  const tokens = tokenResponse(body, { refreshTokenOptional: true, idTokenOptional: true })
+  const scopes = tokens.scope === undefined ? [] : splitScopes(tokens.scope)
   const idToken = tokens.id_token
-  if (refreshToken === undefined || idToken === undefined) throw new OAuthError('ChatGPT did not return a renewable sign-in grant.')
+  if (idToken === undefined) throw new OAuthError('ChatGPT did not return a signed identity token.')
   const identity = await verifyIdentity(idToken, input.clientId, input.nonce, input.requestTimeoutMs, fetcher, input.signal)
   if (input.expectedIdentity !== undefined) {
     if (identity.subject !== input.expectedIdentity.subject || input.clientId !== input.expectedIdentity.clientId) {
       throw new OAuthError('The selected ChatGPT account or workspace did not match this registration.')
     }
   }
+  const registration: OAuthRegistration = {
+    clientId: input.clientId,
+    subject: identity.subject,
+    ...(identity.email === undefined ? {} : { email: identity.email }),
+  }
+  const missingScopes = REQUIRED_SCOPES.filter(scope => !scopes.includes(scope))
+  const refreshToken = tokens.refresh_token
+  if (missingScopes.length > 0 || refreshToken === undefined) {
+    return { status: 'needs-sign-in', registration, missingScopes }
+  }
   return {
+    status: 'connected',
     grant: {
       clientId: input.clientId,
       subject: identity.subject,
