@@ -1,0 +1,4 @@
+# Add the ChatGPT provider to profiles that install this bundle.
+- insert:
+    - id: chatgpt
+      name: '@f4ah6o/dsh-chatgpt'

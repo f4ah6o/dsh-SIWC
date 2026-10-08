@@ -21,17 +21,9 @@ export interface ChatGptModelConfig {
 }
 
 /** One per-profile model override keyed by an exact catalog slug. */
-export interface ChatGptModelOverride {
+export interface ChatGptModelOverride extends ChatGptModelConfig {
   /** Exact model slug returned by OpenAI. */
   readonly model: string
-  /** Maximum combined context size, or undefined to leave it unconfigured. */
-  readonly contextWindow: number | undefined
-  /** Request modalities, or undefined to use official metadata. */
-  readonly inputModalities: readonly ModelModality[] | undefined
-  /** Reasoning options, or undefined to use official metadata. */
-  readonly reasoningEfforts: readonly string[] | undefined
-  /** Default reasoning effort, or undefined to use provider default. */
-  readonly defaultReasoningEffort: string | undefined
 }
 
 /** A sanitized model row from one connected account's server catalog. */

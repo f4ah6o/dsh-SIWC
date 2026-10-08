@@ -8,6 +8,8 @@ import type { ChatGptAccountId } from './types.js'
 export interface ChatGptPreparedCall {
   readonly accountId: ChatGptAccountId
   readonly accessToken: string
+  /** Aborted by the host when this account signs out or loses its grant. */
+  readonly accountSignal: AbortSignal
   readonly model: LlmResolvedModelInfo
   readonly requestTimeoutMs: number
 }

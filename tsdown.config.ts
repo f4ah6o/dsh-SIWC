@@ -2,13 +2,13 @@ import { defineConfig } from 'tsdown'
 import { typertPlugin } from '@deepseek-ai/dsh-typert-generator/tsdown'
 
 export default defineConfig({
-  entry: ['lib/types/index.js'],
+  entry: ['packages/chatgpt/lib/types/index.js'],
   format: 'esm',
   platform: 'node',
   target: 'es2024',
-  outDir: 'lib',
+  outDir: 'packages/chatgpt/lib',
   fixedExtension: false,
   clean: false,
   sourcemap: true,
-  plugins: [typertPlugin({ mode: 'package', faces: ['host'] })],
+  plugins: [typertPlugin({ mode: 'workspace', faces: ['host'] })],
 })

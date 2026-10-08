@@ -1,73 +1,23 @@
 {
-  "name": "@f4ah6o/dsh-chatgpt",
-  "version": "0.1.0",
-  "description": "ChatGPT subscription inference through OpenAI Sign in with ChatGPT for DeepSeek Harness",
-  "license": "MIT",
+  "name": "dsh-chatgpt-plugin-workspace",
+  "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.7.0",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
-  "exports": {
-    ".": {
-      "types": "./lib/types/index.d.ts",
-      "default": "./lib/index.js"
-    },
-    "./types": {
-      "types": "./lib/types/types.d.ts",
-      "default": "./lib/types/types.js"
-    },
-    "./client": {
-      "types": "./lib/types/client/index.d.ts",
-      "default": "./lib/client.js"
-    },
-    "./typert": {
-      "types": "./lib/typert.host.d.ts",
-      "default": "./lib/typert.host.js"
-    },
-    "./remote": {
-      "types": "./lib/typert.remote-client.d.ts",
-      "default": "./lib/typert.remote-client.js"
-    }
-  },
-  "files": [
-    "lib/index.js",
-    "lib/client.js",
-    "lib/types/**/*.js",
-    "lib/types/**/*.d.ts",
-    "lib/typert.host.js",
-    "lib/typert.host.d.ts",
-    "lib/typert.remote-client.js",
-    "lib/typert.remote-client.d.ts"
-  ],
   "scripts": {
+    "build": "pnpm run build:host && pnpm run build:client",
     "build:host": "tsc -b tsconfig.host.json && tsdown --config tsdown.config.ts",
-    "test": "vitest run"
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "~4.0.4 || ~4.0.5-alpha.1",
-    "@deepseek-ai/dsh-attachment": "0.2.0-rc.2 || 0.2.1-alpha.1",
-    "@deepseek-ai/dsh-brand": "0.2.0-rc.2 || 0.2.1-alpha.1",
-    "@deepseek-ai/dsh-credentials": "0.2.0-rc.2 || 0.2.1-alpha.1",
-    "@deepseek-ai/dsh-llm": "0.2.0-rc.2 || 0.2.1-alpha.1",
-    "@deepseek-ai/dsh-typert-protocol": "0.2.0-rc.2 || 0.2.1-alpha.1"
-  },
-  "dependencies": {
-    "@deepseek-ai/schemastery": "^3.18.4",
-    "jose": "^6.2.12",
-    "openai": "^7.30.0"
+    "build:client": "tsc -b tsconfig.client.json && tsdown --config tsdown.client.config.ts",
+    "typecheck": "tsc -b tsconfig.host.json && tsc -b tsconfig.client.json",
+    "test": "pnpm --filter @f4ah6o/dsh-chatgpt test",
+    "pack": "pnpm run build && pnpm --filter @f4ah6o/dsh-chatgpt pack"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "~4.0.5-alpha.1",
-    "@deepseek-ai/dsh-attachment": "0.2.1-alpha.1",
-    "@deepseek-ai/dsh-brand": "0.2.1-alpha.1",
-    "@deepseek-ai/dsh-credentials": "0.2.1-alpha.1",
-    "@deepseek-ai/dsh-llm": "0.2.1-alpha.1",
     "@deepseek-ai/dsh-typert-generator": "0.2.1-alpha.1",
-    "@deepseek-ai/dsh-typert-protocol": "0.2.1-alpha.1",
-    "@deepseek-ai/schemastery": "^3.18.4",
-    "@types/node": "^24.0.0",
+    "lightningcss": "^1.32.0",
     "tsdown": "^0.23.0",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.0"
+    "typescript": "^6.0.3"
   }
 }

@@ -1,0 +1,47 @@
+diff --git a/lib/types/analyzer.js b/lib/types/analyzer.js
+index e7359bc3a2b6445ed71592a961dade79b925542e..440bf9b3eb5ad1bd5a7f38d26a5819f4f7889d83 100644
+--- a/lib/types/analyzer.js
++++ b/lib/types/analyzer.js
+@@ -1719,11 +1719,16 @@ class FaceAnalyzer {
+         const registration = this.registrationForFile(declaration.getSourceFile().fileName);
+         if (registration?.name === '@deepseek-ai/dsh-typert-protocol')
+             return true;
+-        for (let current = declaration; current !== undefined; current = optionalParent(current)) {
+-            if (ts.isModuleDeclaration(current)
+-                && ts.isStringLiteral(current.name)
+-                && current.name.text === '@deepseek-ai/dsh-typert-protocol')
+-                return true;
++        const externalProtocol = externalProtocolManifestForFile(declaration.getSourceFile().fileName);
++        if (externalProtocol !== undefined) {
++            const target = packageExportTargets(externalProtocol.manifest).find(([subpath]) => subpath === '.')?.[1]
++                ?? externalProtocol.manifest.types;
++            if (typeof target === 'string') {
++                const entry = this.sourceFiles.get(realPath(resolve(externalProtocol.root, target.replace(/^\.\//, ''))));
++                const module = entry === undefined ? undefined : this.checker.getSymbolAtLocation(entry);
++                if (module !== undefined && this.checker.getExportsOfModule(module).some(exported => this.resolveSymbol(exported) === resolved))
++                    return true;
++            }
+         }
+         return false;
+     }
+@@ -2555,6 +2560,20 @@ function sourcePathForExport(packageRoot, target) {
+     }
+     return resolve(packageRoot, normalized);
+ }
++function externalProtocolManifestForFile(fileName) {
++    let current = dirname(realPath(fileName));
++    while (current !== dirname(current)) {
++        const manifestPath = join(current, 'package.json');
++        if (existsSync(manifestPath)) {
++            const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
++            return manifest.name === '@deepseek-ai/dsh-typert-protocol'
++                ? { root: current, manifest }
++                : undefined;
++        }
++        current = dirname(current);
++    }
++    return undefined;
++}
+ function preferredDeclaration(symbol) {
+     return symbol.declarations?.find(isTypeDeclaration)
+         ?? symbol.valueDeclaration
