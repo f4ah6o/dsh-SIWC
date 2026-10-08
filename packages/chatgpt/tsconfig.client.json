@@ -26,5 +26,5 @@
     "outDir": "lib/types",
     "tsBuildInfoFile": "lib/tsconfig.client.tsbuildinfo"
   },
-  "include": ["src/client"]
+  "include": ["src/client", "src/types.ts"]
 }

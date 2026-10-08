@@ -9,6 +9,18 @@ dsh plugin --profile web add @f4ah6o/dsh-chatgpt
 dsh plugin --profile headless add @f4ah6o/dsh-chatgpt
 ```
 
+The Host requires DSH's Credentials store and Authorization service. Standard Web, Desktop, headless, and `sdk` profiles that layer `dsh-base` include both. The standalone `sdk-minimal` profile includes neither; add both services before `@f4ah6o/dsh-chatgpt` in that profile:
+
+```yaml
+- insert:
+    - id: credentials
+      name: '@deepseek-ai/dsh-credentials-local'
+    - id: authorization
+      name: '@deepseek-ai/dsh-authorization'
+```
+
+A profile without these services fails at plugin load instead of leaving sign-in unavailable at runtime.
+
 Web and Desktop users can sign in from ChatGPT account settings. To sign in from a CLI-only profile, opt into a local browser flow for that invocation with a profile patch:
 
 ```sh

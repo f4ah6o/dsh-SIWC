@@ -268,6 +268,9 @@ async function verifyIdentity(
   if (typeof payload.exp !== 'number' || payload.exp <= Math.floor(Date.now() / 1_000)) {
     throw new OAuthError('ChatGPT returned an expired or non-expiring identity token.')
   }
+  if (nonce !== undefined && payload.nonce !== nonce) {
+    throw new OAuthError('ChatGPT returned an identity token for another sign-in request.')
+  }
   if (typeof payload.sub !== 'string' || payload.sub.length === 0) {
     throw new OAuthError('ChatGPT returned an identity token without a subject.')
   }

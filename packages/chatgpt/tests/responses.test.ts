@@ -1,5 +1,5 @@
 import { AttachmentId } from '@deepseek-ai/dsh-attachment'
-import { createDeveloperMessage, createSystemMessage } from '@deepseek-ai/dsh-llm'
+import { BlockAssembler, createDeveloperMessage, createSystemMessage } from '@deepseek-ai/dsh-llm'
 import type { GenerateOptions, LlmResolvedModelInfo, StreamChunk } from '@deepseek-ai/dsh-llm'
 import { describe, expect, it } from 'vitest'
 import type { ChatGptAdapterHost } from '../src/adapter-contract.js'
@@ -12,12 +12,15 @@ const officialModel = OFFICIAL_OPENAI_MODELS[0]
 if (officialModel === undefined) throw new Error('official model fixture is missing')
 const model = toOpenAiResolvedModelInfo(provider, officialModel)
 
-function hostFor(accountSignal = new AbortController().signal): ChatGptAdapterHost {
+function hostFor(
+  accountSignal = new AbortController().signal,
+  accountId: ChatGptAccountId = 'account-test' as ChatGptAccountId,
+): ChatGptAdapterHost {
   return {
     listModels: async () => [toOpenAiModelInfo(provider, officialModel)],
     resolveModel: async () => model,
     prepareCall: async () => ({
-      accountId: 'account-test' as ChatGptAccountId,
+      accountId,
       accessToken: 'exchanged-access-token',
       accountSignal,
       model,
@@ -84,6 +87,42 @@ function completedTextEvents(text: string): readonly unknown[] {
           output_tokens_details: { reasoning_tokens: 3 },
           total_tokens: 17,
         },
+      },
+    },
+  ]
+}
+
+function completedReasoningEvents(): readonly unknown[] {
+  const reasoning = {
+    id: 'rs_1',
+    type: 'reasoning',
+    summary: [{ type: 'summary_text', text: 'Plan.' }],
+    encrypted_content: 'opaque-encrypted-reasoning',
+    status: 'completed',
+  }
+  const message = {
+    id: 'msg_reasoning',
+    type: 'message',
+    role: 'assistant',
+    status: 'completed',
+    content: [{ type: 'output_text', text: 'Answer.', annotations: [] }],
+  }
+  return [
+    { type: 'response.output_item.done', output_index: 0, sequence_number: 1, item: reasoning },
+    { type: 'response.output_item.done', output_index: 1, sequence_number: 2, item: message },
+    {
+      type: 'response.completed',
+      sequence_number: 3,
+      response: {
+        id: 'resp_reasoning',
+        object: 'response',
+        created_at: 1,
+        status: 'completed',
+        error: null,
+        incomplete_details: null,
+        output: [reasoning, message],
+        model: officialModel.id,
+        usage: null,
       },
     },
   ]
@@ -189,6 +228,111 @@ describe('ChatGPT Responses adapter', () => {
 
     await expect(collect(adapter, options(override))).rejects.toMatchObject({ code: 'UNSUPPORTED_PARAMETER' })
     expect(requests).toBe(0)
+  })
+
+  it.each([
+    ['session-title', 64],
+    ['compaction', 65_536],
+  ] as const)('omits max_output_tokens for the DSH %s auxiliary call', async (purpose, maxTokens) => {
+    let capturedBody: Record<string, unknown> | undefined
+    const adapter = new ChatGptResponsesAdapter(hostFor(), {
+      fetch: eventFetch(completedTextEvents('Done.'), (_request, body) => { capturedBody = body }),
+    })
+
+    await collect(adapter, options({ purpose, maxTokens }))
+
+    expect(capturedBody).not.toHaveProperty('max_output_tokens')
+  })
+
+  it('replays the exact completed encrypted reasoning item with its assistant response', async () => {
+    const bodies: Record<string, unknown>[] = []
+    const adapter = new ChatGptResponsesAdapter(hostFor(), {
+      fetch: eventFetch(completedReasoningEvents(), (_request, body) => { bodies.push(body) }),
+    })
+    const prior = await assistantFromResponse(adapter)
+
+    await collect(adapter, options({
+      messages: [
+        createSystemMessage('Follow the system instruction.'),
+        { role: 'user', content: [{ type: 'text', text: 'First question.' }] },
+        prior,
+        { role: 'user', content: [{ type: 'text', text: 'Continue.' }] },
+      ],
+    }))
+
+    const secondInput = bodies[1]?.input as Array<Record<string, unknown>>
+    expect(secondInput).toContainEqual({
+      id: 'rs_1',
+      type: 'reasoning',
+      summary: [{ type: 'summary_text', text: 'Plan.' }],
+      encrypted_content: 'opaque-encrypted-reasoning',
+      status: 'completed',
+    })
+    expect(secondInput.slice(-3)).toEqual([
+      {
+        id: 'rs_1',
+        type: 'reasoning',
+        summary: [{ type: 'summary_text', text: 'Plan.' }],
+        encrypted_content: 'opaque-encrypted-reasoning',
+        status: 'completed',
+      },
+      {
+        id: 'msg_reasoning',
+        type: 'message',
+        role: 'assistant',
+        status: 'completed',
+        content: [{ type: 'output_text', text: 'Answer.', annotations: [] }],
+      },
+      { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'Continue.' }] },
+    ])
+  })
+
+  it('does not replay encrypted reasoning after the active account changes', async () => {
+    let accountId = 'account-test' as ChatGptAccountId
+    const baseHost = hostFor()
+    const host: ChatGptAdapterHost = {
+      ...baseHost,
+      prepareCall: async (requestedModel, signal) => ({
+        ...await baseHost.prepareCall(requestedModel, signal),
+        accountId,
+      }),
+    }
+    const bodies: Record<string, unknown>[] = []
+    const adapter = new ChatGptResponsesAdapter(host, {
+      fetch: eventFetch(completedReasoningEvents(), (_request, body) => { bodies.push(body) }),
+    })
+    const prior = await assistantFromResponse(adapter)
+    accountId = 'account-other' as ChatGptAccountId
+
+    await collect(adapter, options({
+      messages: [
+        { role: 'user', content: [{ type: 'text', text: 'First question.' }] },
+        prior,
+        { role: 'user', content: [{ type: 'text', text: 'Continue.' }] },
+      ],
+    }))
+
+    expect(JSON.stringify(bodies[1]?.input)).not.toContain('opaque-encrypted-reasoning')
+  })
+
+  it('does not replay encrypted reasoning through a different provider registration route', async () => {
+    const firstAdapter = new ChatGptResponsesAdapter(hostFor(), { fetch: eventFetch(completedReasoningEvents()) })
+    const prior = await assistantFromResponse(firstAdapter)
+    const bodies: Record<string, unknown>[] = []
+    const secondAdapter = new ChatGptResponsesAdapter(hostFor(), {
+      fetch: eventFetch(completedTextEvents('Done.'), (_request, body) => { bodies.push(body) }),
+    })
+
+    await collect(secondAdapter, options({
+      provider: 'chatgpt-other',
+      messages: [
+        { role: 'user', content: [{ type: 'text', text: 'First question.' }] },
+        prior,
+        { role: 'user', content: [{ type: 'text', text: 'Continue.' }] },
+      ],
+    }))
+
+    expect(JSON.stringify(bodies[0]?.input)).not.toContain('opaque-encrypted-reasoning')
   })
 
   it('keeps historical tool additions in input order', async () => {
@@ -354,8 +498,37 @@ describe('ChatGPT Responses adapter', () => {
     await expect(pending).rejects.toMatchObject({ code: 'ABORTED' })
   })
 
-  it('advertises static official context and no output-token default', () => {
-    expect(model.context?.contextWindow).toBeGreaterThan(0)
+  it('advertises the seven exact official model capabilities without an output-token default', () => {
+    expect(OFFICIAL_OPENAI_MODELS.map(item => item.id)).toEqual([
+      'gpt-6-astra',
+      'gpt-6.1-sol',
+      'gpt-6-sol',
+      'gpt-6-luna',
+      'gpt-5.6-sol',
+      'gpt-5.6-terra',
+      'gpt-5.6-luna',
+    ])
+    expect(OFFICIAL_OPENAI_MODELS.map(item => item.contextWindow)).toEqual(Array(7).fill(1_050_000))
+    expect(OFFICIAL_OPENAI_MODELS.map(item => item.maxOutputTokens)).toEqual(Array(7).fill(128_000))
+    expect(OFFICIAL_OPENAI_MODELS.map(item => item.inputModalities)).toEqual(Array(7).fill(['text', 'image']))
+    expect(OFFICIAL_OPENAI_MODELS.map(item => item.reasoningEfforts.map(String))).toEqual([
+      ['low', 'medium', 'high', 'xhigh', 'max'],
+      ['low', 'medium', 'high', 'xhigh', 'max'],
+      ['none', 'low', 'medium', 'high', 'xhigh', 'max'],
+      ['none', 'low', 'medium', 'high', 'xhigh', 'max'],
+      ['none', 'low', 'medium', 'high', 'xhigh', 'max'],
+      ['none', 'low', 'medium', 'high', 'xhigh', 'max'],
+      ['none', 'low', 'medium', 'high', 'xhigh', 'max'],
+    ])
+    expect(OFFICIAL_OPENAI_MODELS.map(item => item.defaultReasoningEffort === undefined ? undefined : String(item.defaultReasoningEffort))).toEqual([
+      undefined, 'medium', 'medium', 'medium', 'medium', 'medium', 'medium',
+    ])
+    expect(OFFICIAL_OPENAI_MODELS.map(item => {
+      const resolved = toOpenAiResolvedModelInfo(provider, item)
+      return resolved.reasoning?.defaultEffort === undefined ? undefined : String(resolved.reasoning.defaultEffort)
+    })).toEqual([undefined, 'medium', 'medium', 'medium', 'medium', 'medium', 'medium'])
+    expect(OFFICIAL_OPENAI_MODELS.every(item => !('defaultMaxTokens' in toOpenAiResolvedModelInfo(provider, item)))).toBe(true)
+    expect(model.context?.contextWindow).toBe(1_050_000)
     expect(model.toolUpdate).toBe('addition-only')
     expect(model).not.toHaveProperty('defaultMaxTokens')
   })
@@ -383,3 +556,10 @@ describe('ChatGPT Responses adapter', () => {
     })
   })
 })
+
+async function assistantFromResponse(adapter: ChatGptResponsesAdapter) {
+  const chunks = await collect(adapter, options())
+  const assembler = new BlockAssembler()
+  for (const chunk of chunks) assembler.push(chunk)
+  return assembler.message({ provider, model: officialModel.id, replayState: assembler.replayState })
+}

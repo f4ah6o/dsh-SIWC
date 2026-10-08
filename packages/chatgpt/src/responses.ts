@@ -7,8 +7,10 @@ import {
 } from 'openai'
 import type {
   ResponseCreateParamsStreaming,
+  ResponseInputItem,
   ResponseInput,
   ResponseInputContent,
+  ResponseOutputItem,
   ResponseStreamEvent,
   ResponseUsage,
 } from 'openai/resources/responses/responses'
@@ -51,6 +53,12 @@ interface StreamBlock {
   arguments?: string
   started: boolean
   closed: boolean
+}
+
+interface ReplayScope {
+  readonly provider: string
+  readonly model: string
+  readonly accountId: string
 }
 
 type ResponsesReasoningEffort = NonNullable<NonNullable<ResponseCreateParamsStreaming['reasoning']>['effort']>
@@ -115,7 +123,12 @@ export class ChatGptResponsesAdapter extends LlmAdapter {
     }
     let requestId: string | undefined
     try {
-      const request = await createRequest(options, model, this.host, signal)
+      const replayScope = {
+        provider: options.provider,
+        model: model.id,
+        accountId: String(prepared.accountId),
+      } satisfies ReplayScope
+      const request = await createRequest(options, model, this.host, signal, replayScope)
       const sdk = new OpenAI({
         apiKey: prepared.accessToken,
         baseURL: OPENAI_RESPONSES_BASE_URL,
@@ -128,7 +141,7 @@ export class ChatGptResponsesAdapter extends LlmAdapter {
         signal,
       }).withResponse()
       requestId = request_id ?? undefined
-      yield* translateEvents(events, requestId, model.id)
+      yield* translateEvents(events, requestId, replayScope)
     } catch (error: unknown) {
       if (signal.aborted) {
         throw new LlmError('ChatGPT account request was aborted', 'ABORTED', {
@@ -171,7 +184,8 @@ function exactModel(provider: string, model: string, info: LlmResolvedModelInfo)
 }
 
 function assertSupportedOptions(options: GenerateOptions): void {
-  if (options.maxTokens !== undefined) {
+  const auxiliaryPurpose = options.purpose === 'session-title' || options.purpose === 'compaction'
+  if (options.maxTokens !== undefined && !auxiliaryPurpose) {
     throw new LlmError('Sign in with ChatGPT Responses does not accept GenerateOptions.maxTokens', 'UNSUPPORTED_PARAMETER')
   }
   if (options.temperature !== undefined) {
@@ -212,8 +226,9 @@ async function createRequest(
   model: LlmResolvedModelInfo,
   host: ChatGptAdapterHost,
   signal: AbortSignal,
+  replayScope: ReplayScope,
 ): Promise<ResponseCreateParamsStreaming> {
-  const { instructions, input } = await createInput(options, model, host, signal)
+  const { instructions, input } = await createInput(options, model, host, signal, replayScope)
   const effort = options.reasoningEffort
   return {
     model: model.id,
@@ -235,6 +250,7 @@ async function createInput(
   model: LlmResolvedModelInfo,
   host: ChatGptAdapterHost,
   signal: AbortSignal,
+  replayScope: ReplayScope,
 ): Promise<{ instructions?: string; input: ResponseInput }> {
   const input: ResponseInput = []
   const history = options.toolHistory
@@ -265,6 +281,7 @@ async function createInput(
       history,
       supportsAdditionalTools,
       hasCompleteToolHistory,
+      replayScope,
     })
   }
   return { ...(options.system === undefined ? {} : { instructions: options.system }), input }
@@ -276,6 +293,7 @@ interface ToolInputState {
   readonly history: GenerateOptions['toolHistory']
   readonly supportsAdditionalTools: boolean
   readonly hasCompleteToolHistory: boolean
+  readonly replayScope: ReplayScope
 }
 
 async function appendMessage(
@@ -285,6 +303,14 @@ async function appendMessage(
   signal: AbortSignal | undefined,
   toolState: ToolInputState,
 ): Promise<void> {
+  if (message.role === 'assistant') {
+    const replayItems = readReplayItems(message.source.replayState, message.source.provider, message.source.model, toolState.replayScope)
+    if (replayItems !== undefined) {
+      input.push(...replayItems)
+      return
+    }
+  }
+
   if (message.role === 'tool') {
     const output = await blocksToInput(message.content, host, signal)
     const contents = message.isError ? [{ type: 'input_text' as const, text: 'Tool execution failed.' }, ...output] : output
@@ -396,12 +422,13 @@ async function blockToInput(
 async function* translateEvents(
   events: AsyncIterable<ResponseStreamEvent>,
   requestId: string | undefined,
-  model: string,
+  replayScope: ReplayScope,
 ): AsyncGenerator<StreamChunk> {
   const blocks = new Map<string, StreamBlock>()
   const blocksByItemId = new Map<string, StreamBlock>()
   let nextIndex = 0
   let completed = false
+  const completedOutputItems = new Map<number, ResponseInputItem>()
 
   const start = (key: string, type: StreamBlock['type'], itemId?: string): StreamBlock => {
     let block = blocks.get(key)
@@ -514,6 +541,8 @@ async function* translateEvents(
       }
       case 'response.output_item.done': {
         const item = event.item
+        const replayItem = replayableOutputItem(item)
+        if (replayItem !== undefined) completedOutputItems.set(event.output_index, replayItem)
         if (item.type === 'function_call') {
           const itemId = item.id ?? item.call_id
           let block = blocksByItemId.get(itemId)
@@ -603,7 +632,12 @@ async function* translateEvents(
           const end = close(block)
           if (end !== undefined) yield end
         }
-        if (blocks.size === 0) throw new LlmError(`OpenAI model "${model}" returned no content`, 'EMPTY_RESPONSE')
+        if (blocks.size === 0) throw new LlmError(`OpenAI model "${replayScope.model}" returned no content`, 'EMPTY_RESPONSE')
+        const replayItems = event.response.output.map((item, index) =>
+          completedOutputItems.get(index) ?? replayableOutputItem(item))
+        if (replayItems.length === 0 || replayItems.some(item => item === undefined)) {
+          throw new LlmError('OpenAI Responses returned an output item that cannot be replayed with store:false', 'UNSUPPORTED_CONTENT')
+        }
         const usage = mapUsage(event.response.usage)
         if (usage !== undefined) yield { type: 'usage', usage }
         const hadToolCall = event.response.output.some(item => item.type === 'function_call')
@@ -612,10 +646,14 @@ async function* translateEvents(
           reason: hadToolCall ? { kind: 'tool-calls' } : { kind: 'stop' },
           replayState: {
             response: {
+              adapter: 'openai-responses-v1',
+              provider: replayScope.provider,
+              accountId: replayScope.accountId,
               ...(requestId === undefined ? {} : { requestId }),
               id: event.response.id,
               model: event.response.model,
               status: event.response.status,
+              output: replayItems,
             },
           },
         }
@@ -637,6 +675,90 @@ async function* translateEvents(
   }
 
   if (!completed) throw new LlmError('OpenAI Responses stream ended before response.completed', 'STREAM_CLOSED')
+}
+
+function replayableOutputItem(item: ResponseOutputItem): ResponseInputItem | undefined {
+  if (item.type === 'message' || item.type === 'function_call' || item.type === 'reasoning') return item
+  return undefined
+}
+
+function readReplayItems(
+  replayState: unknown,
+  provider: string,
+  model: string,
+  scope: ReplayScope,
+): readonly ResponseInputItem[] | undefined {
+  if (!isRecord(replayState) || !isRecord(replayState.response)) return undefined
+  const response = replayState.response
+  if (response.adapter !== 'openai-responses-v1'
+    || response.provider !== scope.provider
+    || provider !== scope.provider
+    || response.accountId !== scope.accountId
+    || response.model !== scope.model
+    || model !== scope.model
+    || !Array.isArray(response.output)
+    || !response.output.every(isReplayInputItem)) return undefined
+  return response.output
+}
+
+function isReplayInputItem(value: unknown): value is ResponseInputItem {
+  if (!isRecord(value)) return false
+  if (value.type === 'reasoning') return isReasoningInputItem(value)
+  if (value.type === 'message') return isAssistantOutputMessage(value)
+  if (value.type === 'function_call') {
+    return typeof value.call_id === 'string'
+      && typeof value.name === 'string'
+      && typeof value.arguments === 'string'
+      && optionalItemId(value.id)
+      && optionalItemStatus(value.status)
+  }
+  return false
+}
+
+function isReasoningInputItem(value: Record<string, unknown>): boolean {
+  return value.type === 'reasoning'
+    && typeof value.id === 'string'
+    && Array.isArray(value.summary)
+    && value.summary.every(isReasoningSummary)
+    && (value.content === undefined || (Array.isArray(value.content) && value.content.every(isReasoningContent)))
+    && (value.encrypted_content === undefined || value.encrypted_content === null || typeof value.encrypted_content === 'string')
+    && optionalItemStatus(value.status)
+}
+
+function isAssistantOutputMessage(value: Record<string, unknown>): boolean {
+  return value.type === 'message'
+    && value.role === 'assistant'
+    && typeof value.id === 'string'
+    && optionalItemStatus(value.status, false)
+    && Array.isArray(value.content)
+    && value.content.every(isOutputMessageContent)
+}
+
+function isReasoningSummary(value: unknown): boolean {
+  return isRecord(value) && value.type === 'summary_text' && typeof value.text === 'string'
+}
+
+function isReasoningContent(value: unknown): boolean {
+  return isRecord(value) && value.type === 'reasoning_text' && typeof value.text === 'string'
+}
+
+function isOutputMessageContent(value: unknown): boolean {
+  if (!isRecord(value)) return false
+  if (value.type === 'output_text') return typeof value.text === 'string'
+  return value.type === 'refusal' && typeof value.refusal === 'string'
+}
+
+function optionalItemStatus(value: unknown, nullable = true): boolean {
+  return value === undefined || (nullable && value === null)
+    || value === 'in_progress' || value === 'completed' || value === 'incomplete'
+}
+
+function optionalItemId(value: unknown): boolean {
+  return value === undefined || value === null || typeof value === 'string'
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 function mapUsage(usage: ResponseUsage | null | undefined): TokenUsage | undefined {

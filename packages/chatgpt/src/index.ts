@@ -24,8 +24,8 @@ export type { ChatGptResponsesAdapterOptions } from './responses.ts'
 /** Package name shown in plugin diagnostics. */
 export const name = '@f4ah6o/dsh-chatgpt'
 
-/** The Host needs durable credentials and the model-adapter registry. */
-export const inject = ['credentials', 'llm']
+/** The Host needs durable credentials, authorization flows and the model-adapter registry. */
+export const inject = ['credentials', 'authorization', 'llm']
 
 /** Typed Remote operations for profile ChatGPT accounts, catalogs and sign-in. */
 export class ChatGptController extends TypertRemoteService {
@@ -119,5 +119,3 @@ export async function apply(ctx: Context, config: PluginConfig): Promise<void> {
     await host.waitForLogin(ticket.attemptId)
   }
 }
-
-export default apply
