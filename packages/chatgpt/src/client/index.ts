@@ -32,7 +32,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 const NS = 'settings.chatgpt'
 
 /** Services required from the Client shell before this package mounts. */
-export const inject = ['slots', 'locale', 'remote', 'sessions']
+export const inject = ['slots', 'locale', 'remote', 'remote.chatgpt', 'sessions']
 
 /** Mount ChatGPT Remote descriptors and register the account and composer UI.
  * @param ctx - browser Client context.
