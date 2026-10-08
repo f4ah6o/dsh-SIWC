@@ -31,17 +31,35 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 
 const NS = 'settings.chatgpt'
 
-/** Services required from the Client shell before this package mounts. */
-export const inject = ['slots', 'locale', 'remote', 'remote.chatgpt', 'sessions']
+/** The generated Remote namespace is mounted after the Gateway root becomes available. */
+export const inject = ['remote']
+
+const CLIENT_INJECT = ['slots', 'locale', 'remote', 'remote.chatgpt', 'sessions'] as const
 
 /** Mount ChatGPT Remote descriptors and register the account and composer UI.
  * @param ctx - browser Client context.
  * @returns when Remote descriptors and UI registrations are ready.
  */
 export async function apply(ctx: Context): Promise<void> {
-  const unmountRemote = await ctx.remote.$mount(TYPERT_REMOTE)
-  ctx.effect(() => unmountRemote, 'dsh-chatgpt: remote descriptors')
+  await ctx.plugin({
+    name: 'dsh-chatgpt: remote descriptors',
+    inject: ['remote'],
+    async apply(remoteCtx: Context): Promise<void> {
+      const unmountRemote = await remoteCtx.remote.$mount(TYPERT_REMOTE)
+      remoteCtx.effect(() => unmountRemote, 'dsh-chatgpt: remote descriptors')
+    },
+  }).await()
+  await ctx.plugin({
+    name: 'dsh-chatgpt: Client surfaces',
+    inject: CLIENT_INJECT,
+    apply: applyClient,
+  }).await()
+}
 
+/** Register the settings and composer contributions after the Remote namespace exists.
+ * @param ctx - Client child context with the ChatGPT Remote provider injected.
+ */
+function applyClient(ctx: Context): void {
   const attempts = new Set<ChatGptLoginAttemptId>()
   ctx.effect(() => async () => {
     await Promise.all([...attempts].map(async attemptId => {
