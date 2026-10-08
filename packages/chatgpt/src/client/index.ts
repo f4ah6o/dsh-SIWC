@@ -101,5 +101,3 @@ export async function apply(ctx: Context): Promise<void> {
     },
   }, UsageIndicator))
 }
-
-export default apply
