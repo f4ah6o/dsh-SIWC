@@ -221,6 +221,9 @@ export class ChatGptHost implements ChatGptAdapterHost {
           },
         },
       }).then(outcome => {
+        if (outcome.status === 'cancelled' && attempt.committing) {
+          return attempt.completion
+        }
         if (outcome.status === 'cancelled' && !isTerminal(attempt.phase)) {
           return this.finishAttempt(attempt, 'cancelled', 'ChatGPT sign-in was cancelled.')
         }
