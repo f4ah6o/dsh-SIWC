@@ -1,0 +1,58 @@
+{
+  "oldTarball": "dist/f12o-dsh-siwc-0.1.0.tgz",
+  "oldTarballSha256": "15c16502dc658f752c5551b116d98dae286f32c69de3cc9e4d54a279ef1c4110",
+  "newTarball": "dist/f12o-dsh-siwc-0.1.0-alpha.1.tgz",
+  "newTarballSha256": "3c5f83e28a590c804245d05791b5cbead7fbbcc400649ed861bf775c02524a02",
+  "archiveEntries": 40,
+  "changedEntries": [
+    {
+      "path": "package/README.ja.md",
+      "oldSha256": "282b4a0ec4b847db13db30ebae0efa6f3ee4586681afc06aff4151a6a98cdd6d",
+      "newSha256": "8bfc847582ec8979f59910b1906d6dca423b9f3ddf7f6843612df5d54dae2e2f",
+      "oldBytes": 12967,
+      "newBytes": 14826
+    },
+    {
+      "path": "package/README.md",
+      "oldSha256": "939a4d7c1d8d8214a2a2073296d3bf65088b79031fdf202cdbd87749922fac5f",
+      "newSha256": "8a103020ccf7e4d4fb21b1fb0be9fc27d352ab0d15d1283fd5dd16b5ed2b7b8c",
+      "oldBytes": 11749,
+      "newBytes": 13209
+    },
+    {
+      "path": "package/README.zh.md",
+      "oldSha256": "6f04792b49404dedc7f91d66eaef7eae1c8d87d67d39975d662a0684a4caaa7d",
+      "newSha256": "9f7d2c0271234caaacfe0a13e3bc163ba92b6bf75af7295a07df5584be512a44",
+      "oldBytes": 10618,
+      "newBytes": 12127
+    },
+    {
+      "path": "package/lib/client.js",
+      "oldSha256": "f34a93ca2e7f79d0195cfe7271238d6af72329ac12844d77a2c36e33a71a292d",
+      "newSha256": "628e9e46fc77e0aba78e9d8e83beb410fbb57e705c5adf63718a3101e213613a",
+      "oldBytes": 260344,
+      "newBytes": 260344
+    },
+    {
+      "path": "package/package.json",
+      "oldSha256": "97e47402c4fe5632d8857d7ec3697afbb711a331d93cd9b9cf9fbdb253fed088",
+      "newSha256": "28d7a53b8e8a2217ef8ff3143f23e7b9cebe274e4277b4323a80d65e22394579",
+      "oldBytes": 4992,
+      "newBytes": 5000
+    }
+  ],
+  "packageJsonVersionOnly": true,
+  "clientBundleOnlyDifference": "Property ordering in two generated CSS-module class maps",
+  "cssModuleMaps": {
+    "ChatGptSettingsSection_module_css_default": {
+      "keys": 35,
+      "sameKeyValuePairs": true
+    },
+    "UsageIndicator_module_css_default": {
+      "keys": 4,
+      "sameKeyValuePairs": true
+    }
+  },
+  "clientBundleEqualAfterSortingOnlyCssMapProperties": true,
+  "allOtherArchiveEntriesByteIdentical": true
+}
