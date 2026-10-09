@@ -3,8 +3,8 @@ import { basename, dirname, resolve, sep } from 'node:path'
 import { defineConfig, type TsdownPlugin } from 'tsdown'
 import { transform } from 'lightningcss'
 
-const PLUGIN_ID = '@f4ah6o/dsh-chatgpt'
-const CSS_PREFIX = '\0dsh-chatgpt-css:'
+const PLUGIN_ID = '@f12o/dsh-siwc'
+const CSS_PREFIX = '\0dsh-siwc-css:'
 const CSS_SUFFIX = '.mjs'
 const LOADER_MODULES = new Set([
   'react', 'react/jsx-runtime', 'react-dom', 'react-dom/client',
@@ -32,7 +32,7 @@ function inlineSvgAssets(css: string, stylesheet: string, addWatchFile: (file: s
     const path = value.split(/[?#]/u, 1)[0]
     if (path === undefined || !path.toLowerCase().endsWith('.svg')) return whole
     const asset = resolve(dirname(stylesheet), decodeURIComponent(path))
-    if (!existsSync(asset)) throw new Error(`dsh-chatgpt: missing SVG asset ${asset}`)
+    if (!existsSync(asset)) throw new Error(`dsh-siwc: missing SVG asset ${asset}`)
     addWatchFile(asset)
     const contents = readFileSync(asset).toString('base64')
     return `url("data:image/svg+xml;base64,${contents}")`
@@ -42,11 +42,11 @@ function inlineSvgAssets(css: string, stylesheet: string, addWatchFile: (file: s
 /** Inject one package-owned stylesheet and return its CSS-module class map. */
 function cssModules(): TsdownPlugin {
   return {
-    name: 'dsh-chatgpt-css-modules',
+    name: 'dsh-siwc-css-modules',
     resolveId(source, importer) {
       if (!source.endsWith('.module.css') || importer === undefined) return null
       const file = sourceAssetPath(source, importer)
-      if (!existsSync(file)) throw new Error(`dsh-chatgpt: missing stylesheet ${file}`)
+      if (!existsSync(file)) throw new Error(`dsh-siwc: missing stylesheet ${file}`)
       return `${CSS_PREFIX}${file}${CSS_SUFFIX}`
     },
     load(virtualId) {

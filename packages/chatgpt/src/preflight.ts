@@ -6,11 +6,11 @@ import type {} from '@deepseek-ai/dsh-authorization'
 import type {} from '@deepseek-ai/dsh-credentials'
 import type {} from '@deepseek-ai/dsh-llm'
 
-const CHATGPT_HOST_PACKAGE = '@f4ah6o/dsh-chatgpt'
+const CHATGPT_HOST_PACKAGE = '@f12o/dsh-siwc'
 const REQUIRED_SERVICES = ['credentials', 'authorization', 'llm'] as const
 
 /** Name shown in Cordis plugin diagnostics. */
-export const name = '@f4ah6o/dsh-chatgpt/preflight'
+export const name = '@f12o/dsh-siwc/preflight'
 
 /** Require the DSH launcher readiness signal and public Loader entry registry. */
 export const inject = ['appReady', 'loader']

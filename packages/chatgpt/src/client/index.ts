@@ -8,10 +8,10 @@ import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type {} from '@f4ah6o/dsh-chatgpt/remote'
-import type { ChatGptLoginAttemptId } from '@f4ah6o/dsh-chatgpt/types'
+import type {} from '@f12o/dsh-siwc/remote'
+import type { ChatGptLoginAttemptId } from '@f12o/dsh-siwc/types'
 import type { SessionBinding } from '@deepseek-ai/dsh-api-session-controller/client'
-import { TYPERT_REMOTE } from '@f4ah6o/dsh-chatgpt/remote'
+import { TYPERT_REMOTE } from '@f12o/dsh-siwc/remote'
 import { en, ja, zh, type ChatGptKey } from './locales.ts'
 import { ChatGptSettingsSection } from './ChatGptSettingsSection.tsx'
 import type { ChatGptSettingsInjected } from './ChatGptSettingsSection.tsx'
@@ -42,15 +42,15 @@ const CLIENT_INJECT = ['slots', 'locale', 'remote', 'remote.chatgpt', 'sessions'
  */
 export async function apply(ctx: Context): Promise<void> {
   await ctx.plugin({
-    name: 'dsh-chatgpt: remote descriptors',
+    name: 'dsh-siwc: remote descriptors',
     inject: ['remote'],
     async apply(remoteCtx: Context): Promise<void> {
       const unmountRemote = await remoteCtx.remote.$mount(TYPERT_REMOTE)
-      remoteCtx.effect(() => unmountRemote, 'dsh-chatgpt: remote descriptors')
+      remoteCtx.effect(() => unmountRemote, 'dsh-siwc: remote descriptors')
     },
   }).await()
   await ctx.plugin({
-    name: 'dsh-chatgpt: Client surfaces',
+    name: 'dsh-siwc: Client surfaces',
     inject: CLIENT_INJECT,
     apply: applyClient,
   }).await()
@@ -67,20 +67,20 @@ function applyClient(ctx: Context): void {
       catch (_error) { /* Host teardown may already have removed the attempt. */ }
     }))
     attempts.clear()
-  }, 'dsh-chatgpt: pending login attempts')
+  }, 'dsh-siwc: pending login attempts')
 
   ctx.effect(() => {
     const offEnglish = ctx.locale.register(NS, 'en', en)
     const offJapanese = ctx.locale.register(NS, 'ja', ja)
     const offChinese = ctx.locale.register(NS, 'zh', zh)
     return () => { offChinese(); offJapanese(); offEnglish() }
-  }, 'dsh-chatgpt: locale dictionaries')
+  }, 'dsh-siwc: locale dictionaries')
   const t = ctx.locale.bind(NS)
   const usageLimits = new Map<SessionBinding, ChatGptUsageLimitSource>()
   ctx.effect(() => () => {
     for (const source of usageLimits.values()) source.dispose()
     usageLimits.clear()
-  }, 'dsh-chatgpt: usage notices')
+  }, 'dsh-siwc: usage notices')
 
   const settingsInjected = (): ChatGptSettingsInjected => ({
     remote: ctx.remote.chatgpt,
@@ -104,7 +104,7 @@ function applyClient(ctx: Context): void {
     locale: NS,
     inject: (sessionId): UsageIndicatorInjected => {
       const binding = ctx.sessions.binding(sessionId)
-      if (binding === undefined) throw new Error(`dsh-chatgpt: unknown Session "${String(sessionId)}"`)
+      if (binding === undefined) throw new Error(`dsh-siwc: unknown Session "${String(sessionId)}"`)
       let usageLimit = usageLimits.get(binding)
       if (usageLimit === undefined) {
         usageLimit = new ChatGptUsageLimitSource(binding)
@@ -113,7 +113,7 @@ function applyClient(ctx: Context): void {
         binding.ctx.effect(() => () => {
           source.dispose()
           usageLimits.delete(binding)
-        }, 'dsh-chatgpt: Session usage notice')
+        }, 'dsh-siwc: Session usage notice')
       }
       return { hooks: { usageLimit } }
     },

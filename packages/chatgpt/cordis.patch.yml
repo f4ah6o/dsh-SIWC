@@ -1,7 +1,7 @@
 # Add the ChatGPT Host and its required-service check to profiles using this bundle.
 - insert:
     - id: chatgpt
-      name: '@f4ah6o/dsh-chatgpt'
+      name: '@f12o/dsh-siwc'
 
     - id: chatgpt-preflight
-      name: '@f4ah6o/dsh-chatgpt/preflight'
+      name: '@f12o/dsh-siwc/preflight'

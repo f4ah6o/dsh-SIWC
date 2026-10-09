@@ -22,7 +22,7 @@ export { ChatGptResponsesAdapter } from './responses.ts'
 export type { ChatGptResponsesAdapterOptions } from './responses.ts'
 
 /** Package name shown in plugin diagnostics. */
-export const name = '@f4ah6o/dsh-chatgpt'
+export const name = '@f12o/dsh-siwc'
 
 /** The Host needs durable credentials, authorization flows and the model-adapter registry. */
 export const inject = ['credentials', 'authorization', 'llm']

@@ -3,7 +3,7 @@ description: "Add local ChatGPT subscription inference and account controls to D
 kind: "package-bundle"
 ---
 
-# `@f4ah6o/dsh-chatgpt`
+# `@f12o/dsh-siwc`
 
 English | [日本語](README.ja.md) | [中文](README.zh.md)
 
@@ -30,11 +30,11 @@ From a built plugin checkout, create a tarball and add it to a profile. The comm
 
 ```sh
 pnpm --dir packages/chatgpt pack
-dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f4ah6o-dsh-chatgpt-0.1.0.tgz
-dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f4ah6o-dsh-chatgpt-0.1.0.tgz
+dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
+dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
 ```
 
-The bundle inserts the ChatGPT plugin row. Remove it with `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt`. The package has not been published to npm yet. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1`; other DSH API versions are not covered.
+After the initial npm release, install by package name with `dsh plugin --profile web add @f12o/dsh-siwc` or `dsh plugin --profile headless add @f12o/dsh-siwc`. Until then, install the local tarball above. The bundle inserts the ChatGPT plugin row; remove it with `dsh plugin --profile web remove @f12o/dsh-siwc`. This package's npm identity is `@f12o/dsh-siwc` at version `0.1.0`. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1`; other DSH API versions are not covered.
 
 The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`. The bundle also inserts a startup check. When the DSH launcher signals readiness, the check reports missing services for an enabled ChatGPT Host row and aborts startup; it skips a disabled or deleted Host row. The standalone `sdk-minimal` profile omits Credentials and Authorization. Add matching provider packages to that profile, then add their rows to its `cordis.patch.yml`:
 
@@ -86,7 +86,7 @@ Use `modelOverrides` in profile config for an unknown exact catalog slug or an S
 
 ```yaml
 - id: chatgpt
-  name: '@f4ah6o/dsh-chatgpt'
+  name: '@f12o/dsh-siwc'
   config:
     modelOverrides:
       - model: exact-catalog-slug

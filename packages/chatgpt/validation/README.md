@@ -1,12 +1,12 @@
-# ChatGPT auxiliary wire probe
+# SIWC auxiliary wire probe
 
 Run this probe after installing the packed ChatGPT plugin in a profile and installing the matching public DSH packages in a consumer. It accepts DSH `0.2.0-rc.2` and `0.2.1-alpha.1`.
 
-Set `DSH_CONSUMER_DIR` to the consumer directory and `DSH_PLUGIN_DIR` to the installed `@f4ah6o/dsh-chatgpt` package directory, then run `auxiliary-wire-probe.mjs` with Node `^22.19.0 || >=24.0.0`. For example:
+Set `DSH_CONSUMER_DIR` to the consumer directory and `DSH_PLUGIN_DIR` to the installed `@f12o/dsh-siwc` package directory, then run `auxiliary-wire-probe.mjs` with Node `^22.19.0 || >=24.0.0`. For example:
 
 ```sh
 DSH_CONSUMER_DIR=/path/to/consumer \
-DSH_PLUGIN_DIR=/path/to/profile/node_modules/@f4ah6o/dsh-chatgpt \
+DSH_PLUGIN_DIR=/path/to/profile/node_modules/@f12o/dsh-siwc \
 node /path/to/plugin-checkout/packages/chatgpt/validation/auxiliary-wire-probe.mjs
 ```
 
@@ -17,6 +17,8 @@ The fixture generates a local signing key, fake OAuth tokens, a local callback s
 Responses requests omit `max_output_tokens`. The policy values remain recorded by DSH and guide the title and compaction callers, but the provider cannot enforce those values as output ceilings when the Responses API request omits the cap.
 
 ## Recorded compatibility run
+
+The current probe targets `@f12o/dsh-siwc`. The recorded v5 runs below used the preserved `@f4ah6o/dsh-chatgpt` tarball from before the package identity changed; that artifact and its historical results remain unchanged.
 
 The validated v5 package has SHA-256 `66ed59d58fe7d241d2cfcfc777939a7a3d7d49710cdce4cbecc9dcee8ffeeb2d` and is preserved at `dist/f4ah6o-dsh-chatgpt-0.1.0.tgz`. The run completed on 2026-10-08 against published DSH `0.2.0-rc.2` and `0.2.1-alpha.1` installations and the `f4ah6o/deepseek-harness` fork.
 

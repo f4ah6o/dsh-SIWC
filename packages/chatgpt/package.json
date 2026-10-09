@@ -1,8 +1,16 @@
 {
-  "name": "@f4ah6o/dsh-chatgpt",
+  "name": "@f12o/dsh-siwc",
   "version": "0.1.0",
   "description": "ChatGPT subscription inference through OpenAI Sign in with ChatGPT for DeepSeek Harness",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f4ah6o/dsh-SIWC.git",
+    "directory": "packages/chatgpt"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"

@@ -3,7 +3,7 @@ description: "为 DeepSeek Harness profile 添加 ChatGPT 订阅推理和账号�
 kind: "package-bundle"
 ---
 
-# `@f4ah6o/dsh-chatgpt`
+# `@f12o/dsh-siwc`
 
 [English](README.md) | [日本語](README.ja.md) | 中文
 
@@ -30,11 +30,11 @@ kind: "package-bundle"
 
 ```sh
 pnpm --dir packages/chatgpt pack
-dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f4ah6o-dsh-chatgpt-0.1.0.tgz
-dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f4ah6o-dsh-chatgpt-0.1.0.tgz
+dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
+dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
 ```
 
-bundle 会添加 ChatGPT plugin 配置项。运行 `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` 可移除该项。本包尚未发布到 npm。已验证的 DSH Host API 版本为 `0.2.0-rc.2` 和 `0.2.1-alpha.1`。
+npm 首次发布后，可使用 `dsh plugin --profile web add @f12o/dsh-siwc` 或 `dsh plugin --profile headless add @f12o/dsh-siwc` 按包名安装。在此之前，请使用上方的本地 tarball。bundle 会添加 ChatGPT plugin 配置项。运行 `dsh plugin --profile web remove @f12o/dsh-siwc` 可移除该项。npm 包名为 `@f12o/dsh-siwc`，版本为 `0.1.0`。已验证的 DSH Host API 版本为 `0.2.0-rc.2` 和 `0.2.1-alpha.1`。
 
 Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务。bundle 还会添加启动检查。DSH launcher 发出 readiness 信号时，检查会报告启用的 ChatGPT Host entry 缺少哪些服务并中止启动；如果 Host entry 已禁用或删除，则跳过检查。独立的 `sdk-minimal` profile 不包含 Credentials 和 Authorization。请在该 profile 中安装与 DSH 版本匹配的 provider package，并在其 `cordis.patch.yml` 中添加对应 entry：
 

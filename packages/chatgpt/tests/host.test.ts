@@ -46,7 +46,7 @@ function config(activeAccountId: string | undefined): {
 }
 
 async function home(): Promise<string> {
-  const path = await mkdtemp(join(tmpdir(), 'dsh-chatgpt-host-'))
+  const path = await mkdtemp(join(tmpdir(), 'dsh-siwc-host-'))
   homes.push(path)
   return path
 }

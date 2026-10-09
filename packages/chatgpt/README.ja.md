@@ -3,7 +3,7 @@ description: "DeepSeek Harness の profile に ChatGPT サブスクリプショ�
 kind: "package-bundle"
 ---
 
-# `@f4ah6o/dsh-chatgpt`
+# `@f12o/dsh-siwc`
 
 [English](README.md) | 日本語 | [中文](README.zh.md)
 
@@ -30,11 +30,11 @@ kind: "package-bundle"
 
 ```sh
 pnpm --dir packages/chatgpt pack
-dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f4ah6o-dsh-chatgpt-0.1.0.tgz
-dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f4ah6o-dsh-chatgpt-0.1.0.tgz
+dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
+dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
 ```
 
-bundle が ChatGPT plugin 行を追加します。削除する場合は `dsh plugin --profile web remove @f4ah6o/dsh-chatgpt` を実行します。npm にはまだ公開されていません。Host API の対応確認済み DSH バージョンは `0.2.0-rc.2` と `0.2.1-alpha.1` です。
+npm 初回公開後は `dsh plugin --profile web add @f12o/dsh-siwc` または `dsh plugin --profile headless add @f12o/dsh-siwc` でパッケージ名からインストールできます。それまでは上記のローカル tarball を使ってください。bundle は ChatGPT plugin 行を追加します。削除する場合は `dsh plugin --profile web remove @f12o/dsh-siwc` を実行します。npm 上の名前は `@f12o/dsh-siwc`、version は `0.1.0` です。Host API の対応確認済み DSH バージョンは `0.2.0-rc.2` と `0.2.1-alpha.1` です。
 
 Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含みます。bundle は起動チェックも追加します。DSH launcher の readiness 通知時に、有効な ChatGPT Host entry の不足サービスを報告して起動を失敗させます。Host entry が無効または削除済みならチェックを省略します。独立した `sdk-minimal` profile には Credentials と Authorization がありません。該当 profile に DSH と同じバージョンの provider package を追加し、`cordis.patch.yml` に entry を追加します。
 

@@ -86,12 +86,12 @@ describe('ChatGPT Client Loader entry', () => {
     ctx.loader.internal = {
       version: 'test',
       import: async (specifier: string) => {
-        expect(specifier).toBe('@f4ah6o/dsh-chatgpt')
+        expect(specifier).toBe('@f12o/dsh-siwc')
         return client
       },
     } as never
 
-    const entryId = await ctx.loader.create({ name: '@f4ah6o/dsh-chatgpt' })
+    const entryId = await ctx.loader.create({ name: '@f12o/dsh-siwc' })
     const entry = ctx.loader.resolve(entryId)
     // Cordis publishes FiberState as a const enum, so its runtime package has no enum object.
     expect(entry.fiber?.state).toBe(0)

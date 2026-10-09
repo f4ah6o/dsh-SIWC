@@ -5,7 +5,7 @@ import { WorkspaceTypertGenerator } from '@deepseek-ai/dsh-typert-generator'
 import { afterEach, describe, expect, it } from 'vitest'
 import { TYPERT_REMOTE } from '../lib/typert.remote-client.js'
 
-const packageName = '@f4ah6o/dsh-chatgpt'
+const packageName = '@f12o/dsh-siwc'
 const root = import.meta.dirname === undefined ? process.cwd() : `${import.meta.dirname}/../../..`
 const methods = [
   'acknowledgeWelcome',
@@ -31,7 +31,7 @@ describe('standalone Typert artifacts', () => {
     expect(remote).toBeDefined()
     expect(remote?.dts).toContain('declare module \'@deepseek-ai/dsh-typert-protocol\'')
     for (const method of methods) expect(remote?.dts).toContain(`${method}:`)
-    expect(remote?.js.match(/id: '@f4ah6o\/dsh-chatgpt#chatgpt\//gu)).toHaveLength(methods.length)
+    expect(remote?.js.match(/id: '@f12o\/dsh-siwc#chatgpt\//gu)).toHaveLength(methods.length)
   })
 
   it('ships the complete tsdown-generated Client contribution and strict codecs', () => {
@@ -96,7 +96,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
 })
 
 function copyTypertFixture(): string {
-  const fixture = mkdtempSync(join(tmpdir(), 'dsh-chatgpt-typert-'))
+  const fixture = mkdtempSync(join(tmpdir(), 'dsh-siwc-typert-'))
   temporaryRoots.push(fixture)
   mkdirSync(join(fixture, 'packages'), { recursive: true })
   cpSync(join(root, 'tsconfig.host.json'), join(fixture, 'tsconfig.host.json'))

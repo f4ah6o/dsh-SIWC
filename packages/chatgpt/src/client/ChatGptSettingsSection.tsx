@@ -8,7 +8,7 @@ import { Button, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {
   ChatGptAccountId, ChatGptAccountView, ChatGptLoginAttemptId, ChatGptModelConfig, ChatGptModelView, ChatGptState,
-} from '@f4ah6o/dsh-chatgpt/types'
+} from '@f12o/dsh-siwc/types'
 import type { ChatGptKey } from './locales.ts'
 import css from './ChatGptSettingsSection.module.css'
 
@@ -196,7 +196,7 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
       pendingPopups.current.add(popup)
     }
     const generation = ++requestGeneration.current
-    let ticket: import('@f4ah6o/dsh-chatgpt/types').ChatGptLoginTicket
+    let ticket: import('@f12o/dsh-siwc/types').ChatGptLoginTicket
     try {
       ticket = remoteValue(await remote.beginLogin(accountId === undefined ? {} : { accountId }))
       if (!live.current || requestGeneration.current !== generation) {

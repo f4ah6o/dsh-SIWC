@@ -16,10 +16,10 @@ assert.ok(supportedDshVersions.includes(consumerManifest.version), `Unsupported 
 
 const pluginDir = process.env.DSH_PLUGIN_DIR ? resolve(process.env.DSH_PLUGIN_DIR) : consumerDir
 const pluginRequire = createRequire(resolve(pluginDir, 'package.json'))
-const pluginEntryPath = pluginRequire.resolve('@f4ah6o/dsh-chatgpt')
+const pluginEntryPath = pluginRequire.resolve('@f12o/dsh-siwc')
 const pluginPackageDir = resolve(dirname(pluginEntryPath), '..')
 const pluginManifest = JSON.parse(await readFile(join(pluginPackageDir, 'package.json'), 'utf8'))
-assert.equal(pluginManifest.name, '@f4ah6o/dsh-chatgpt', `Unexpected plugin at ${pluginPackageDir}`)
+assert.equal(pluginManifest.name, '@f12o/dsh-siwc', `Unexpected plugin at ${pluginPackageDir}`)
 
 const consumerModuleNames = [
   '@deepseek-ai/cordis',
@@ -223,7 +223,7 @@ globalThis.fetch = async (input, init) => {
   })
 }
 
-const scratchHome = await mkdtemp(join(tmpdir(), 'dsh-chatgpt-aux-wire-'))
+const scratchHome = await mkdtemp(join(tmpdir(), 'dsh-siwc-aux-wire-'))
 const credentialPath = join(scratchHome, '.credentials.yaml')
 let ctx
 let fibers = []
