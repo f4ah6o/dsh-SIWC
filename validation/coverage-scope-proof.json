@@ -1,0 +1,2120 @@
+{
+  "dynamicPatternAudit": {
+    "patterns": [
+      "packages/shell/bash-local/src/**/*.ts",
+      "packages/shell/bash-sandbox/src/**/*.ts",
+      "packages/shell/tool-bash/src/**/*.ts",
+      "packages/hooks/*/src/**/*.ts",
+      "packages/terminal/terminal-bash/src/**/*.ts",
+      "packages/experimental/ptc-runtime-python/src/**/*.ts",
+      "packages/sandbox/sandbox-local/src/**/*.ts",
+      "packages/ssh/*/src/**/*.ts",
+      "packages/sandbox/sandbox-windows-acl/src/**/*.ts",
+      "packages/subprocess/subprocess-local/src/windows-inspector.ts",
+      "packages/sandbox/sandbox-windows-acl/src/runner.ts",
+      "packages/session/session-persistence-jsonl/src/lease.ts",
+      "packages/shell/pwsh-local/src/index.ts",
+      "packages/shell/pwsh-sandbox/src/**/*.ts",
+      "packages/subprocess/*/src/**/*.ts"
+    ],
+    "differences": []
+  },
+  "perPattern": [
+    {
+      "before": "packages/client/ui-trajectory/src/*",
+      "after": "packages/client/ui-trajectory/src/**",
+      "oldExcluded": 31,
+      "newExcludedBefore": 2,
+      "newExcludedAfter": 31,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-renderer/src/client/*",
+      "after": "packages/client/ui-renderer/src/client/**",
+      "oldExcluded": 8,
+      "newExcludedBefore": 8,
+      "newExcludedAfter": 8,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-conversation/src/client/*",
+      "after": "packages/client/ui-conversation/src/client/**",
+      "oldExcluded": 69,
+      "newExcludedBefore": 11,
+      "newExcludedAfter": 69,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-chat/src/client/conversation-nodes/*",
+      "after": "packages/client/ui-chat/src/client/conversation-nodes/**",
+      "oldExcluded": 21,
+      "newExcludedBefore": 21,
+      "newExcludedAfter": 21,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-chat/src/client/details/*",
+      "after": "packages/client/ui-chat/src/client/details/**",
+      "oldExcluded": 0,
+      "newExcludedBefore": 0,
+      "newExcludedAfter": 0,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-chat/src/client/model/*",
+      "after": "packages/client/ui-chat/src/client/model/**",
+      "oldExcluded": 3,
+      "newExcludedBefore": 3,
+      "newExcludedAfter": 3,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-tool/src/*",
+      "after": "packages/client/ui-tool/src/**",
+      "oldExcluded": 40,
+      "newExcludedBefore": 2,
+      "newExcludedAfter": 40,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-slots/src/*",
+      "after": "packages/client/ui-slots/src/**",
+      "oldExcluded": 3,
+      "newExcludedBefore": 3,
+      "newExcludedAfter": 3,
+      "differences": []
+    },
+    {
+      "before": "packages/client/ui-layout/src/*",
+      "after": "packages/client/ui-layout/src/**",
+      "oldExcluded": 10,
+      "newExcludedBefore": 2,
+      "newExcludedAfter": 10,
+      "differences": []
+    },
+    {
+      "before": "packages/client/web/src/*",
+      "after": "packages/client/web/src/**",
+      "oldExcluded": 12,
+      "newExcludedBefore": 10,
+      "newExcludedAfter": 12,
+      "differences": []
+    },
+    {
+      "before": "packages/host/webserver/src/*",
+      "after": "packages/host/webserver/src/**",
+      "oldExcluded": 2,
+      "newExcludedBefore": 2,
+      "newExcludedAfter": 2,
+      "differences": []
+    },
+    {
+      "before": "packages/experimental/webworker-packer/src/*",
+      "after": "packages/experimental/webworker-packer/src/**",
+      "oldExcluded": 7,
+      "newExcludedBefore": 7,
+      "newExcludedAfter": 7,
+      "differences": []
+    }
+  ],
+  "versions": {
+    "vitestOld": "4.1.8",
+    "providerOld": "4.1.8",
+    "picomatchOld": "4.0.4",
+    "vitestNew": "5.0.3",
+    "providerNew": "5.0.3",
+    "picomatchNew": "4.0.7"
+  },
+  "identicalCoverageLiteralAndSpreadConfig": true,
+  "changed": [
+    {
+      "before": "packages/client/ui-trajectory/src/*",
+      "after": "packages/client/ui-trajectory/src/**"
+    },
+    {
+      "before": "packages/client/ui-renderer/src/client/*",
+      "after": "packages/client/ui-renderer/src/client/**"
+    },
+    {
+      "before": "packages/client/ui-conversation/src/client/*",
+      "after": "packages/client/ui-conversation/src/client/**"
+    },
+    {
+      "before": "packages/client/ui-chat/src/client/conversation-nodes/*",
+      "after": "packages/client/ui-chat/src/client/conversation-nodes/**"
+    },
+    {
+      "before": "packages/client/ui-chat/src/client/details/*",
+      "after": "packages/client/ui-chat/src/client/details/**"
+    },
+    {
+      "before": "packages/client/ui-chat/src/client/model/*",
+      "after": "packages/client/ui-chat/src/client/model/**"
+    },
+    {
+      "before": "packages/client/ui-tool/src/*",
+      "after": "packages/client/ui-tool/src/**"
+    },
+    {
+      "before": "packages/client/ui-slots/src/*",
+      "after": "packages/client/ui-slots/src/**"
+    },
+    {
+      "before": "packages/client/ui-layout/src/*",
+      "after": "packages/client/ui-layout/src/**"
+    },
+    {
+      "before": "packages/client/web/src/*",
+      "after": "packages/client/web/src/**"
+    },
+    {
+      "before": "packages/host/webserver/src/*",
+      "after": "packages/host/webserver/src/**"
+    },
+    {
+      "before": "packages/experimental/webworker-packer/src/*",
+      "after": "packages/experimental/webworker-packer/src/**"
+    }
+  ],
+  "fixture": {
+    "original": [
+      {
+        "file": "packages/client/ui-tool/src/index.ts",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/entry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/card.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src2/entry.ts",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-tool-extra/src/client/entry.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-renderer/src/clients/entry.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-renderer/src/client/deep/card.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-renderer/src/index.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/tree/Card.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/host.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-chat/src/client/chat/ApprovalCommand.tsx",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/api/session-controller/src/client/sessions/assistant-stream.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-git-branch/src/client/index.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/locale-ja/src/client/index.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/test-support/client-runtime/src/assembly/bundle-roster.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/context/agent-instructions/src/index.ts",
+        "old": true,
+        "new": true
+      }
+    ],
+    "fixed": [
+      {
+        "file": "packages/client/ui-tool/src/index.ts",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/entry.ts",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/card.ts",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-tool/src2/entry.ts",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-tool-extra/src/client/entry.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-renderer/src/clients/entry.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-renderer/src/client/deep/card.ts",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-renderer/src/index.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/tree/Card.tsx",
+        "old": false,
+        "new": false
+      },
+      {
+        "file": "packages/client/ui-conversation/src/host.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-chat/src/client/chat/ApprovalCommand.tsx",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/api/session-controller/src/client/sessions/assistant-stream.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-git-branch/src/client/index.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/client/locale-ja/src/client/index.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/test-support/client-runtime/src/assembly/bundle-roster.ts",
+        "old": true,
+        "new": true
+      },
+      {
+        "file": "packages/context/agent-instructions/src/index.ts",
+        "old": true,
+        "new": true
+      }
+    ],
+    "untestedOld": [
+      "packages/api/session-controller/src/client/sessions/assistant-stream.ts",
+      "packages/client/locale-ja/src/client/index.ts",
+      "packages/client/ui-chat/src/client/chat/ApprovalCommand.tsx",
+      "packages/client/ui-conversation/src/host.ts",
+      "packages/client/ui-git-branch/src/client/index.ts",
+      "packages/client/ui-renderer/src/clients/entry.ts",
+      "packages/client/ui-renderer/src/index.ts",
+      "packages/client/ui-tool-extra/src/client/entry.ts",
+      "packages/context/agent-instructions/src/index.ts",
+      "packages/test-support/client-runtime/src/assembly/bundle-roster.ts"
+    ],
+    "untestedNew": [
+      "packages/api/session-controller/src/client/sessions/assistant-stream.ts",
+      "packages/client/locale-ja/src/client/index.ts",
+      "packages/client/ui-chat/src/client/chat/ApprovalCommand.tsx",
+      "packages/client/ui-conversation/src/host.ts",
+      "packages/client/ui-git-branch/src/client/index.ts",
+      "packages/client/ui-renderer/src/clients/entry.ts",
+      "packages/client/ui-renderer/src/index.ts",
+      "packages/client/ui-tool-extra/src/client/entry.ts",
+      "packages/context/agent-instructions/src/index.ts",
+      "packages/test-support/client-runtime/src/assembly/bundle-roster.ts"
+    ],
+    "untestedFixed": [
+      "packages/api/session-controller/src/client/sessions/assistant-stream.ts",
+      "packages/client/locale-ja/src/client/index.ts",
+      "packages/client/ui-chat/src/client/chat/ApprovalCommand.tsx",
+      "packages/client/ui-conversation/src/host.ts",
+      "packages/client/ui-git-branch/src/client/index.ts",
+      "packages/client/ui-renderer/src/clients/entry.ts",
+      "packages/client/ui-renderer/src/index.ts",
+      "packages/client/ui-tool-extra/src/client/entry.ts",
+      "packages/context/agent-instructions/src/index.ts",
+      "packages/test-support/client-runtime/src/assembly/bundle-roster.ts"
+    ]
+  },
+  "baselineOriginal": {
+    "files": 2384,
+    "includedOld": 1738,
+    "includedNew": 1873,
+    "differences": [
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/composer-blocks.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/composer-submission.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/context-producer.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/conversation.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/draft-editor.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/groups.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/input.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/records.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/request-inspection.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/slots.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/snapshot.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/system-prompt.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/views.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/assembler.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/assembly.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/definition-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/event-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/group-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/group-store.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/historical-images.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/location-index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/view-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/blocks.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/decorations.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/ComposerContentEditable.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/DecoratorPortals.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/DraftEditor.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/ReferenceChip.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/chip-node.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/claim-decor.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/keymap.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/projection.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/reference-activation.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/runtime.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/span-map.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/text-ref.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/view-binding.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/facade.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/hub.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/machine.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/submission-analytics.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/submission-policy.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/queue/QueueDock.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/settings/EnterBehaviorRow.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ContextMeter.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationContent.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationHeader.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationMainPanel.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationPanel.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationRoot.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationSession.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationWidthControls.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/DefaultConversationViews.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/EmptyHero.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/InputBar.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/TodoPanel.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/control-row-layout.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/safari.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/AppFrame.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/DocumentTitle.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/columns.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/service.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/shortcut-locales.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/stores.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/theme-presenter.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/apply.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/contract/slots.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/locale.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/ToolCallTree.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/AskQuestionCard.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/QuestionToolRow.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/ToolDetails.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/ToolRow.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/ask-question-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/auto-review-denial.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/control-details-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/detail-model-shared.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/details-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/diff-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/image-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/inspection-details-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/primitive-labels.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/raw-tool-call.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/read-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/search-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/terminal-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/todo-diff-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/todo-history.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/tool-call-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/web-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/ask-question-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/bash-sample.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/details-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/file-mutation-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/plan-summary.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/read-family-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/read-image-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/read-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/search-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/todo-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/web-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryCell.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryGroupHeader.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTable.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTimeline.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryToolbar.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTurn.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTurnHeader.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryView.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/code-program.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/copy-codes.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/duration-store.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/layout.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/locales.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/string-wrapping-store.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/timeline.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-assistant-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-compaction-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-contract.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-definition-common.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-event-projection.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-message-definitions.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-preview.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-record.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-request-header-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-search-index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-snapshot-builder.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-tool-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-virtual-rows.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/web/src/window-drag/recall.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/web/src/window-drag/regions.ts",
+        "old": false,
+        "new": true
+      }
+    ]
+  },
+  "baselineFixed": {
+    "files": 2384,
+    "includedOld": 1738,
+    "includedNew": 1738,
+    "differences": []
+  },
+  "currentOriginal": {
+    "files": 2453,
+    "includedOld": 1806,
+    "includedNew": 1941,
+    "differences": [
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/composer-blocks.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/composer-submission.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/context-producer.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/conversation.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/draft-editor.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/groups.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/input.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/records.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/request-inspection.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/slots.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/snapshot.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/system-prompt.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/contract/views.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/assembler.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/assembly.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/definition-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/event-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/group-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/group-store.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/historical-images.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/location-index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/conversation/view-registry.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/blocks.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/decorations.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/ComposerContentEditable.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/DecoratorPortals.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/DraftEditor.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/ReferenceChip.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/chip-node.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/claim-decor.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/keymap.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/projection.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/reference-activation.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/runtime.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/span-map.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/text-ref.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/editor/view-binding.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/facade.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/hub.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/machine.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/submission-analytics.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/input/submission-policy.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/queue/QueueDock.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/settings/EnterBehaviorRow.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ContextMeter.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationContent.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationHeader.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationMainPanel.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationPanel.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationRoot.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationSession.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/ConversationWidthControls.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/DefaultConversationViews.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/EmptyHero.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/InputBar.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/TodoPanel.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/control-row-layout.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-conversation/src/client/skeleton/safari.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/AppFrame.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/DocumentTitle.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/columns.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/service.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/shortcut-locales.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/stores.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-layout/src/client/theme-presenter.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/apply.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/contract/slots.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/locale.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/ToolCallTree.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/AskQuestionCard.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/QuestionToolRow.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/ToolDetails.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/components/ToolRow.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/ask-question-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/auto-review-denial.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/control-details-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/detail-model-shared.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/details-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/diff-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/image-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/inspection-details-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/primitive-labels.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/raw-tool-call.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/read-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/search-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/terminal-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/todo-diff-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/todo-history.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/tool-call-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/models/web-card-model.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/ask-question-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/bash-sample.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/details-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/file-mutation-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/plan-summary.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/read-family-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/read-image-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/read-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/search-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/todo-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-tool/src/client/tool/toolviews/web-row.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryCell.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryGroupHeader.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTable.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTimeline.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryToolbar.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTurn.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryTurnHeader.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/TrajectoryView.tsx",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/code-program.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/copy-codes.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/duration-store.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/layout.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/locales.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/string-wrapping-store.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/timeline.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-assistant-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-compaction-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-contract.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-definition-common.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-event-projection.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-message-definitions.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-preview.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-record.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-request-header-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-search-index.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-snapshot-builder.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-tool-definition.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/ui-trajectory/src/client/trajectory-virtual-rows.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/web/src/window-drag/recall.ts",
+        "old": false,
+        "new": true
+      },
+      {
+        "file": "packages/client/web/src/window-drag/regions.ts",
+        "old": false,
+        "new": true
+      }
+    ]
+  },
+  "currentFixed": {
+    "files": 2453,
+    "includedOld": 1806,
+    "includedNew": 1806,
+    "differences": []
+  },
+  "failures": [
+    {
+      "file": "packages/client/ui-conversation/src/client/contract/snapshot.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/contract/system-prompt.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/conversation/assembler.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/conversation/assembly.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/conversation/definition-registry.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/conversation/event-registry.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/conversation/historical-images.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/conversation/location-index.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/decorations.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/ReferenceChip.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/claim-decor.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/keymap.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/projection.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/reference-activation.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/runtime.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/span-map.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/text-ref.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/editor/view-binding.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/facade.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/hub.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/machine.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/input/submission-analytics.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/queue/QueueDock.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/skeleton/ContextMeter.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/skeleton/ConversationContent.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/skeleton/ConversationMainPanel.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/skeleton/ConversationSession.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/skeleton/ConversationWidthControls.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/skeleton/EmptyHero.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-conversation/src/client/skeleton/InputBar.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-layout/src/client/index.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/components/QuestionToolRow.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/components/ToolDetails.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/control-details-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/detail-model-shared.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/details-card-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/diff-card-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/image-card-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/inspection-details-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/primitive-labels.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/raw-tool-call.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/read-card-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/search-card-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/terminal-card-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/todo-history.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/tool-call-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/models/web-card-model.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/toolviews/ask-question-row.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/toolviews/bash-sample.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/toolviews/details-row.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/toolviews/file-mutation-row.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/toolviews/search-row.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-tool/src/client/tool/toolviews/web-row.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/TrajectoryTable.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/TrajectoryTimeline.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/TrajectoryToolbar.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/TrajectoryView.tsx",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/index.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/layout.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/timeline.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-assistant-definition.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-compaction-definition.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-event-projection.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-message-definitions.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-preview.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-request-header-definition.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-search-index.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-snapshot-builder.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/ui-trajectory/src/client/trajectory-tool-definition.ts",
+      "old": false,
+      "new": false
+    },
+    {
+      "file": "packages/client/web/src/window-drag/recall.ts",
+      "old": false,
+      "new": false
+    }
+  ],
+  "failureSummary": {
+    "files": 70,
+    "baselineExcluded": 70,
+    "fixedExcluded": 70,
+    "allPredateChanges": true
+  },
+  "sourceRefs": {
+    "baseline": "5badb15009ae1756c3afe0ae0cef1faafc290ccc",
+    "current": "8f358b851655cf1551ac7dd96a7bf5277d6086cc"
+  },
+  "scopeNote": "Counts classify all tracked packages/*/*/src/**/*.ts and .tsx files (including declarations) using immutable coverage literal patterns. Unchanged platform-selected patterns were independently audited on the union of both inventories and had zero matcher differences."
+}

@@ -1,0 +1,1973 @@
+{
+  "commit": "5c9f0bdfdbf24bc91e6ac3c2d5e06712f04cf816",
+  "namespaces": 58,
+  "keys": 2535,
+  "interpolated": 416,
+  "candidateCounts": [
+    2
+  ],
+  "activeDiscovered": [
+    "approval",
+    "chat",
+    "command",
+    "common",
+    "conversation",
+    "cordis",
+    "deliverables",
+    "directory-browser",
+    "documentHtml",
+    "documentMarkdown",
+    "feedback",
+    "gitBranch",
+    "goal",
+    "job",
+    "model",
+    "open-in-app",
+    "permission.access",
+    "plan",
+    "pluginManager",
+    "question",
+    "reference",
+    "schedule.catalog",
+    "schedule.manager",
+    "session-log-download",
+    "settings",
+    "settings.account",
+    "settings.agentLoop",
+    "settings.agentPreset",
+    "settings.locale",
+    "settings.models",
+    "settings.permission",
+    "settings.pluginInventory",
+    "settings.plugins",
+    "settings.sessionLog",
+    "settings.shell",
+    "settings.subagent",
+    "settings.theme",
+    "settings.webSearch",
+    "shortcuts",
+    "shortcuts.layout",
+    "sidebar",
+    "sidebarBrowser",
+    "sidebarCodePreview",
+    "sidebarDocumentPreview",
+    "sidebarExcel",
+    "sidebarFiles",
+    "sidebarImage",
+    "sidebarOffice",
+    "sidebarPdf",
+    "sidebarRight",
+    "sidebarTerminal",
+    "skill",
+    "slash.menu",
+    "subagent",
+    "trajectory",
+    "workflowRun",
+    "workspace"
+  ],
+  "rows": [
+    {
+      "namespace": "agent-team",
+      "keys": 25,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/experimental/client-ui-agent-team/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "trigger",
+              "智能体团队"
+            ],
+            [
+              "loading",
+              "正在加载团队…"
+            ]
+          ]
+        },
+        {
+          "file": "packages/experimental/client-ui-agent-team/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "trigger",
+              "Agent Team"
+            ],
+            [
+              "loading",
+              "Loading Team…"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "approval",
+      "keys": 5,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-approval/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "waiting",
+              "等待审批"
+            ],
+            [
+              "detail.aria",
+              "审批详情"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-approval/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "waiting",
+              "Waiting for approval"
+            ],
+            [
+              "detail.aria",
+              "Approval details"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "chat",
+      "keys": 186,
+      "interpolated": 39,
+      "candidates": [
+        {
+          "file": "packages/client/ui-chat/src/client/locale.ts",
+          "firstKeys": [
+            [
+              "message.stepProcess.thinking",
+              "正在分析请求"
+            ],
+            [
+              "message.stepProcess.read",
+              "正在读取文件"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-chat/src/client/locale.ts",
+          "firstKeys": [
+            [
+              "message.stepProcess.thinking",
+              "Analyzing the request"
+            ],
+            [
+              "message.stepProcess.read",
+              "Reading files"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "command",
+      "keys": 28,
+      "interpolated": 3,
+      "candidates": [
+        {
+          "file": "packages/client/ui-commands/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "section.add",
+              "添加"
+            ],
+            [
+              "section.commands",
+              "指令"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-commands/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "section.add",
+              "Add"
+            ],
+            [
+              "section.commands",
+              "Commands"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "common",
+      "keys": 41,
+      "interpolated": 4,
+      "candidates": [
+        {
+          "file": "packages/client/locale/src/locales/zh.ts",
+          "firstKeys": [
+            [
+              "ok",
+              "确定"
+            ],
+            [
+              "cancel",
+              "取消"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/locale/src/locales/en.ts",
+          "firstKeys": [
+            [
+              "ok",
+              "OK"
+            ],
+            [
+              "cancel",
+              "Cancel"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "conversation",
+      "keys": 369,
+      "interpolated": 62,
+      "candidates": [
+        {
+          "file": "packages/client/ui-conversation/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "shortcut.newline",
+              "换行"
+            ],
+            [
+              "shortcut.complementary",
+              "使用互补的 Queue／Steer 方式"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-conversation/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "shortcut.newline",
+              "New line"
+            ],
+            [
+              "shortcut.complementary",
+              "Use the complementary Queue / Steer action"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "cordis",
+      "keys": 51,
+      "interpolated": 6,
+      "candidates": [
+        {
+          "file": "packages/extensions/ui-cordis/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "row.defineTitle",
+              "注册 Cordis 插件"
+            ],
+            [
+              "a11y.preparing",
+              "准备调用 Cordis 工具"
+            ]
+          ]
+        },
+        {
+          "file": "packages/extensions/ui-cordis/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "row.defineTitle",
+              "Register Cordis Plugin"
+            ],
+            [
+              "a11y.preparing",
+              "Preparing a Cordis tool call"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "deliverables",
+      "keys": 60,
+      "interpolated": 14,
+      "candidates": [
+        {
+          "file": "packages/client/ui-deliverables/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "presented.nativeUnavailable",
+              "此文件没有可用的主机路径，请在侧边栏预览"
+            ],
+            [
+              "presented.revealError",
+              "无法在文件管理器中显示，请重试"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-deliverables/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "presented.nativeUnavailable",
+              "This file has no available Host path. Preview it in the sidebar."
+            ],
+            [
+              "presented.revealError",
+              "Could not show in file manager. Try again."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "directory-browser",
+      "keys": 13,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-directory-picker-browse/src/client/index.ts",
+          "firstKeys": [
+            [
+              "browser.title",
+              "选择工作区目录"
+            ],
+            [
+              "browser.home",
+              "主目录"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-directory-picker-browse/src/client/index.ts",
+          "firstKeys": [
+            [
+              "browser.title",
+              "Select Workspace Directory"
+            ],
+            [
+              "browser.home",
+              "Home"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "documentHtml",
+      "keys": 4,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/html/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "HTML"
+            ],
+            [
+              "frame",
+              "HTML 文档预览"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/html/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "HTML"
+            ],
+            [
+              "frame",
+              "HTML document preview"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "documentMarkdown",
+      "keys": 4,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/markdown/locales.ts",
+          "firstKeys": [
+            [
+              "viewer.label",
+              "Markdown"
+            ],
+            [
+              "code.copy",
+              "复制"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/markdown/locales.ts",
+          "firstKeys": [
+            [
+              "viewer.label",
+              "Markdown"
+            ],
+            [
+              "code.copy",
+              "Copy"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "feedback",
+      "keys": 20,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-message-feedback/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "action.like",
+              "好的回答"
+            ],
+            [
+              "action.likeActive",
+              "取消标记"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-message-feedback/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "action.like",
+              "Good response"
+            ],
+            [
+              "action.likeActive",
+              "Remove rating"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "gitBranch",
+      "keys": 2,
+      "interpolated": 2,
+      "candidates": [
+        {
+          "file": "packages/client/ui-git-branch/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "branch.aria",
+              "Git 分支：{ref}"
+            ],
+            [
+              "detached.aria",
+              "Git 分离 HEAD：{ref}"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-git-branch/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "branch.aria",
+              "Git branch: {ref}"
+            ],
+            [
+              "detached.aria",
+              "Detached Git HEAD: {ref}"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "goal",
+      "keys": 12,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-goal/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "phase.active",
+              "进行中的目标"
+            ],
+            [
+              "phase.active.disarmed",
+              "已暂停的目标"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-goal/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "phase.active",
+              "Ongoing Goal"
+            ],
+            [
+              "phase.active.disarmed",
+              "Inactive Goal"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "job",
+      "keys": 39,
+      "interpolated": 18,
+      "candidates": [
+        {
+          "file": "packages/client/ui-jobs/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "count.live.one",
+              "{count} 个后台任务运行中"
+            ],
+            [
+              "count.live.other",
+              "{count} 个后台任务运行中"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-jobs/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "count.live.one",
+              "{count} background job running"
+            ],
+            [
+              "count.live.other",
+              "{count} background jobs running"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "model",
+      "keys": 24,
+      "interpolated": 5,
+      "candidates": [
+        {
+          "file": "packages/client/ui-model-selection/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "provider.account",
+              "DeepSeek 账号"
+            ],
+            [
+              "command.label",
+              "模型"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-model-selection/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "provider.account",
+              "DeepSeek Account"
+            ],
+            [
+              "command.label",
+              "Model"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "open-in-app",
+      "keys": 45,
+      "interpolated": 2,
+      "candidates": [
+        {
+          "file": "packages/client/ui-open-in-app/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "open.title",
+              "用 {app} 打开"
+            ],
+            [
+              "path.appDefault",
+              "{app}（默认）"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-open-in-app/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "open.title",
+              "Open in {app}"
+            ],
+            [
+              "path.appDefault",
+              "{app} (default)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "permission.access",
+      "keys": 17,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-permission-presets/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "mode",
+              "访问模式，当前：{name}"
+            ],
+            [
+              "close",
+              "关闭"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-permission-presets/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "mode",
+              "Access mode, current: {name}"
+            ],
+            [
+              "close",
+              "Close"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "plan",
+      "keys": 17,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-plan/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "chip.label",
+              "计划"
+            ],
+            [
+              "preview.title",
+              "计划"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-plan/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "chip.label",
+              "Plan"
+            ],
+            [
+              "preview.title",
+              "Plan"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "pluginManager",
+      "keys": 197,
+      "interpolated": 40,
+      "candidates": [
+        {
+          "file": "packages/client/ui-plugin-manager/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "panel",
+              "插件"
+            ],
+            [
+              "title",
+              "插件"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-plugin-manager/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "panel",
+              "Plugins"
+            ],
+            [
+              "title",
+              "Plugins"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "question",
+      "keys": 31,
+      "interpolated": 2,
+      "candidates": [
+        {
+          "file": "packages/client/ui-user-questions/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "error.incomplete",
+              "请先完成这道问题。"
+            ],
+            [
+              "error.unanswered",
+              "请选择一个选项或填写自定义答案。"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-user-questions/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "error.incomplete",
+              "Please complete this question first."
+            ],
+            [
+              "error.unanswered",
+              "Please select an option or enter a custom answer."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "reference",
+      "keys": 11,
+      "interpolated": 5,
+      "candidates": [
+        {
+          "file": "packages/client/ui-reference/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "section.files",
+              "文件与文件夹"
+            ],
+            [
+              "section.subagents",
+              "子智能体"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-reference/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "section.files",
+              "Files & folders"
+            ],
+            [
+              "section.subagents",
+              "Subagents"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "schedule.catalog",
+      "keys": 70,
+      "interpolated": 36,
+      "candidates": [
+        {
+          "file": "packages/client/ui-schedule/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "trigger.label",
+              "提醒"
+            ],
+            [
+              "list.loading",
+              "正在加载提醒…"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-schedule/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "trigger.label",
+              "Reminders"
+            ],
+            [
+              "list.loading",
+              "Loading reminders…"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "schedule.manager",
+      "keys": 188,
+      "interpolated": 36,
+      "candidates": [
+        {
+          "file": "packages/client/ui-schedule/src/client/task-manager-locales.ts",
+          "firstKeys": [
+            [
+              "panel",
+              "Automation tasks"
+            ],
+            [
+              "title",
+              "Automation tasks"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-schedule/src/client/task-manager-locales.ts",
+          "firstKeys": [
+            [
+              "panel",
+              "自动化任务"
+            ],
+            [
+              "title",
+              "自动化任务"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "session-log-download",
+      "keys": 10,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/session-query/session-log-export/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "header.more",
+              "更多操作"
+            ],
+            [
+              "menu.download",
+              "下载 Session 日志"
+            ]
+          ]
+        },
+        {
+          "file": "packages/session-query/session-log-export/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "header.more",
+              "More actions"
+            ],
+            [
+              "menu.download",
+              "Download session log"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings",
+      "keys": 34,
+      "interpolated": 4,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-general/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "trigger",
+              "设置"
+            ],
+            [
+              "shortcut.open",
+              "打开设置"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-general/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "trigger",
+              "Settings"
+            ],
+            [
+              "shortcut.open",
+              "Open settings"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.account",
+      "keys": 94,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-account/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "modelSignInRequired",
+              "Model unavailable. Please sign in and try again."
+            ],
+            [
+              "sessionExpired",
+              "You have signed out of your account, please log in again."
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-account/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "modelSignInRequired",
+              "当前模型暂不可用，请登录后再试"
+            ],
+            [
+              "sessionExpired",
+              "登录信息已失效，请重新登录"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.agentLoop",
+      "keys": 12,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-agent-loop/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Agent loop"
+            ],
+            [
+              "description",
+              "Control how the Agent dispatches tool calls."
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-agent-loop/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Agent 循环"
+            ],
+            [
+              "description",
+              "控制 Agent 派发工具调用的方式。"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.agentPreset",
+      "keys": 47,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-agent-preset/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "modeExplanation",
+              "Mode details"
+            ],
+            [
+              "howToUse",
+              "How to use"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-agent-preset/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "modeExplanation",
+              "模式说明"
+            ],
+            [
+              "howToUse",
+              "如何使用"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.locale",
+      "keys": 1,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/locale/src/locales/settings.ts",
+          "firstKeys": [
+            [
+              "language.title",
+              "语言"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/locale/src/locales/settings.ts",
+          "firstKeys": [
+            [
+              "language.title",
+              "Language"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.models",
+      "keys": 113,
+      "interpolated": 8,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-models/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "nav",
+              "Models"
+            ],
+            [
+              "deepSeekAccount",
+              "DeepSeek Account"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-models/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "nav",
+              "模型"
+            ],
+            [
+              "deepSeekAccount",
+              "DeepSeek 账号"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.permission",
+      "keys": 12,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-permission-presets/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "权限"
+            ],
+            [
+              "description",
+              "选择新会话的默认权限模式"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-permission-presets/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Permission"
+            ],
+            [
+              "description",
+              "Choose the default permission mode for new sessions"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.pluginInventory",
+      "keys": 40,
+      "interpolated": 4,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-plugin-inventory/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "tab",
+              "插件列表"
+            ],
+            [
+              "loading",
+              "正在读取插件…"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-plugin-inventory/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "tab",
+              "Plugin list"
+            ],
+            [
+              "loading",
+              "Reading plugins…"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.plugins",
+      "keys": 5,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-plugins/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "nav",
+              "Built-in plugins"
+            ],
+            [
+              "title",
+              "Built-in plugins"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-plugins/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "nav",
+              "内置插件"
+            ],
+            [
+              "title",
+              "内置插件"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.sessionLog",
+      "keys": 4,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-session-log/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Upload Session Log when using the official model API"
+            ],
+            [
+              "description",
+              "Help improve DeepSeek models and products."
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-session-log/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "在使用官方模型 API 时上传 Session Log"
+            ],
+            [
+              "description",
+              "帮助改进 DeepSeek 模型与产品"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.shell",
+      "keys": 14,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-shell/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Shell"
+            ],
+            [
+              "description",
+              "Limit how long each command may run and how much it may output."
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-shell/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "终端"
+            ],
+            [
+              "description",
+              "限制每条命令最多能跑多久、最多输出多少内容。"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.subagent",
+      "keys": 35,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-subagent/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "overridden",
+              "Overridden"
+            ],
+            [
+              "reset",
+              "Reset to default"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-subagent/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "overridden",
+              "已覆盖"
+            ],
+            [
+              "reset",
+              "恢复默认"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.theme",
+      "keys": 9,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-theme/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "appearance.title",
+              "外观"
+            ],
+            [
+              "appearance.light",
+              "浅色"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-theme/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "appearance.title",
+              "Appearance"
+            ],
+            [
+              "appearance.light",
+              "Light"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "settings.webSearch",
+      "keys": 18,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-settings-web-search/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Web search"
+            ],
+            [
+              "description",
+              "Set up the DeepSeek search provider."
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-settings-web-search/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "网页搜索"
+            ],
+            [
+              "description",
+              "设置 DeepSeek 的搜索提供方。"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "shortcuts",
+      "keys": 56,
+      "interpolated": 6,
+      "candidates": [
+        {
+          "file": "packages/client/ui-shortcuts/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "edit-label",
+              "修改{command}快捷键"
+            ],
+            [
+              "record",
+              "按下快捷键"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-shortcuts/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "edit-label",
+              "Edit shortcut for {command}"
+            ],
+            [
+              "record",
+              "Press a shortcut"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "shortcuts.layout",
+      "keys": 1,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-layout/src/client/shortcut-locales.ts",
+          "firstKeys": [
+            [
+              "toggle",
+              "展开／收起左侧栏"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-layout/src/client/shortcut-locales.ts",
+          "firstKeys": [
+            [
+              "toggle",
+              "Toggle left sidebar"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebar",
+      "keys": 5,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "session.new",
+              "新会话"
+            ],
+            [
+              "session.new.label",
+              "新建会话"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "session.new",
+              "New Session"
+            ],
+            [
+              "session.new.label",
+              "New session"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarBrowser",
+      "keys": 26,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-browser/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "type.label",
+              "浏览器"
+            ],
+            [
+              "guide.title",
+              "浏览器"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-browser/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "type.label",
+              "Browser"
+            ],
+            [
+              "guide.title",
+              "Browser"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarCodePreview",
+      "keys": 3,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/code/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "代码"
+            ],
+            [
+              "copy",
+              "复制"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/code/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Code"
+            ],
+            [
+              "copy",
+              "Copy"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarDocumentPreview",
+      "keys": 22,
+      "interpolated": 3,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "loading",
+              "文档渲染中..."
+            ],
+            [
+              "loadMore",
+              "加载更多"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "loading",
+              "Rendering document..."
+            ],
+            [
+              "loadMore",
+              "Load more"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarExcel",
+      "keys": 15,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/excel/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "表格"
+            ],
+            [
+              "language",
+              "zh"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/excel/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Spreadsheet"
+            ],
+            [
+              "language",
+              "en"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarFiles",
+      "keys": 17,
+      "interpolated": 1,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-files/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "shortcut.noSession",
+              "请先选择会话"
+            ],
+            [
+              "type.label",
+              "文件"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-files/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "shortcut.noSession",
+              "Select a session first"
+            ],
+            [
+              "type.label",
+              "Files"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarImage",
+      "keys": 11,
+      "interpolated": 2,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/image/locales.ts",
+          "firstKeys": [
+            [
+              "zoomControls",
+              "缩放控件"
+            ],
+            [
+              "zoomMenu",
+              "选择缩放比例"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/image/locales.ts",
+          "firstKeys": [
+            [
+              "zoomControls",
+              "Zoom controls"
+            ],
+            [
+              "zoomMenu",
+              "Choose zoom"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarOffice",
+      "keys": 15,
+      "interpolated": 2,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/office/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Office 文档"
+            ],
+            [
+              "loading",
+              "文档渲染中..."
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/office/locales.ts",
+          "firstKeys": [
+            [
+              "title",
+              "Office document"
+            ],
+            [
+              "loading",
+              "Rendering document..."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarPdf",
+      "keys": 15,
+      "interpolated": 3,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/pdf/locales.ts",
+          "firstKeys": [
+            [
+              "zoomControls",
+              "缩放控件"
+            ],
+            [
+              "zoomMenu",
+              "选择缩放比例"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-documentpreview/src/client/pdf/locales.ts",
+          "firstKeys": [
+            [
+              "zoomControls",
+              "Zoom controls"
+            ],
+            [
+              "zoomMenu",
+              "Choose zoom"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarRight",
+      "keys": 34,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-right/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "command.close",
+              "关闭当前页面／窗口"
+            ],
+            [
+              "command.refresh",
+              "刷新当前页面"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-right/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "command.close",
+              "Close current page or window"
+            ],
+            [
+              "command.refresh",
+              "Refresh current page"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "sidebarTerminal",
+      "keys": 28,
+      "interpolated": 4,
+      "candidates": [
+        {
+          "file": "packages/client/ui-sidebar-terminal/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "shortcut.noSession",
+              "请先选择会话"
+            ],
+            [
+              "recoveryFailed",
+              "恢复终端失败：{message}"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-sidebar-terminal/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "shortcut.noSession",
+              "Select a session first"
+            ],
+            [
+              "recoveryFailed",
+              "Terminal recovery failed: {message}"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "skill",
+      "keys": 8,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-skill/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "row.title",
+              "加载技能"
+            ],
+            [
+              "row.running",
+              "正在加载 skill"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-skill/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "row.title",
+              "Skill"
+            ],
+            [
+              "row.running",
+              "Loading skill"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "slash.menu",
+      "keys": 9,
+      "interpolated": 0,
+      "candidates": [
+        {
+          "file": "packages/client/ui-input-trigger/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "command",
+              "指令"
+            ],
+            [
+              "skill",
+              "技能"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-input-trigger/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "command",
+              "Commands"
+            ],
+            [
+              "skill",
+              "Skills"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "subagent",
+      "keys": 39,
+      "interpolated": 22,
+      "candidates": [
+        {
+          "file": "packages/client/ui-subagent/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "duration.seconds",
+              "{seconds}秒"
+            ],
+            [
+              "duration.minutes",
+              "{minutes}分{seconds}秒"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-subagent/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "duration.seconds",
+              "{seconds}s"
+            ],
+            [
+              "duration.minutes",
+              "{minutes}m {seconds}s"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "trajectory",
+      "keys": 192,
+      "interpolated": 37,
+      "candidates": [
+        {
+          "file": "packages/client/ui-trajectory/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "view.trajectory",
+              "轨迹"
+            ],
+            [
+              "toolbar.aria",
+              "轨迹工具栏"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-trajectory/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "view.trajectory",
+              "Trajectory"
+            ],
+            [
+              "toolbar.aria",
+              "Trajectory toolbar"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "workflowRun",
+      "keys": 18,
+      "interpolated": 9,
+      "candidates": [
+        {
+          "file": "packages/client/ui-workflow-run/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "run.title",
+              "{name}"
+            ],
+            [
+              "run.members.one",
+              "{count} 个成员"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-workflow-run/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "run.title",
+              "{name}"
+            ],
+            [
+              "run.members.one",
+              "{count} member"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "namespace": "workspace",
+      "keys": 114,
+      "interpolated": 29,
+      "candidates": [
+        {
+          "file": "packages/client/ui-workspace/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "defaultWorkspace.failed",
+              "无法创建默认工作区，请通过“选择工作区”选择文件夹"
+            ],
+            [
+              "draft.workspaceRequired",
+              "请先选择工作区"
+            ]
+          ]
+        },
+        {
+          "file": "packages/client/ui-workspace/src/client/locales.ts",
+          "firstKeys": [
+            [
+              "defaultWorkspace.failed",
+              "Unable to create default workspace. Use Choose workspace to select a folder."
+            ],
+            [
+              "draft.workspaceRequired",
+              "Choose a workspace first."
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "pathNormalization": {
+    "status": "normalized copy",
+    "candidateFilePaths": "relative to the DeepSeek Harness checkout root",
+    "rawProofPreservedAt": "/tmp/dsh-ja-owner-parity-audit-K8KtGQ/proof.json"
+  }
+}
