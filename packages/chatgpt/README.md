@@ -9,7 +9,7 @@ English | [日本語](README.ja.md) | [中文](README.zh.md)
 
 ## Summary
 
-Add ChatGPT subscription models to a DeepSeek Harness profile without a separate API key. Sign in through OpenAI in a browser on the same PC; the Host keeps account grants in the DSH Credentials store, while Web and Desktop show redacted account controls. Base-backed profiles already provide the required services. This package is currently installed from a locally packed tarball.
+Add ChatGPT subscription models to a DeepSeek Harness profile without a separate API key. Sign in through OpenAI in a browser on the same PC; the Host keeps account grants in the DSH Credentials store, while Web and Desktop show redacted account controls. Base-backed profiles already provide the required services.
 
 ## Table of Contents
 
@@ -24,17 +24,39 @@ Add ChatGPT subscription models to a DeepSeek Harness profile without a separate
 <a id="use-this-package"></a>
 ## Use this package
 
-### Pack and install
+### Install from npm
 
-From a built plugin checkout, create a tarball and add it to a profile. The commands below were tested with the DSH source CLI and an isolated profile home.
+After npm publishes version `0.1.0`, add the bundle to every profile that will use ChatGPT:
+
+```sh
+dsh plugin --profile web add @f12o/dsh-siwc@0.1.0
+dsh plugin --profile headless add @f12o/dsh-siwc@0.1.0
+dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0
+```
+
+For Desktop CLI installs, launch the application once to create its profile, then fully quit it before running package commands. Use that release's bundled `dsh` CLI, not a different `dsh` on `PATH`. The current fork places its CLI at `resources/runtime/cli/bin/dsh` (`dsh.cmd` on Windows); confirm the path for your installed release. You can also use Desktop's Plugin Manager after profile setup. Reopen Desktop after CLI package operations.
+
+If a profile already has the former `@f4ah6o/dsh-chatgpt` package, remove it from that same profile before adding this package:
+
+```sh
+dsh plugin --profile <profile> remove @f4ah6o/dsh-chatgpt
+dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0
+```
+
+The former and current package names use the same provider identity, Remote namespace, and credential IDs. Keep the same `$DSH_HOME` to preserve the credential store; a valid saved grant remains usable without signing in again, while an expired or revoked grant may require sign-in. For Desktop, use its bundled CLI with Desktop closed for both commands.
+
+### Install a local Pack
+
+Before the npm release is available, pack the standalone plugin checkout and add its tarball to a profile:
 
 ```sh
 pnpm --dir packages/chatgpt pack
 dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
 dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
+dsh plugin --profile desktop add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0.tgz
 ```
 
-After the initial npm release, install by package name with `dsh plugin --profile web add @f12o/dsh-siwc` or `dsh plugin --profile headless add @f12o/dsh-siwc`. Until then, install the local tarball above. The bundle inserts the ChatGPT plugin row; remove it with `dsh plugin --profile web remove @f12o/dsh-siwc`. This package's npm identity is `@f12o/dsh-siwc` at version `0.1.0`. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1`; other DSH API versions are not covered.
+The bundle inserts the ChatGPT plugin row; remove it with `dsh plugin --profile <profile> remove @f12o/dsh-siwc`. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1`; other DSH API versions are not covered.
 
 The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`. The bundle also inserts a startup check. When the DSH launcher signals readiness, the check reports missing services for an enabled ChatGPT Host row and aborts startup; it skips a disabled or deleted Host row. The standalone `sdk-minimal` profile omits Credentials and Authorization. Add matching provider packages to that profile, then add their rows to its `cordis.patch.yml`:
 
@@ -147,3 +169,4 @@ OpenAI receives the full request history on each call; the adapter does not send
 - **Model metadata can lag OpenAI’s catalog** — new slugs need a positive `contextWindow` override before the provider exposes them to inference. The account catalog still controls availability and order.
 - **Plan limits are account-owned** — when OpenAI rejects inference at the plan limit, use the **Manage usage** action to open [ChatGPT usage settings](https://chatgpt.com/settings/usage).
 - **Same-home sign-out is shared** — profiles using one `$DSH_HOME` share account grants; signing out in one removes the saved tokens for all of them.
+- **Desktop verification is incomplete** — a prior Windows attempt with official DSH `0.2.0-rc.2` failed after plugin installation with a reported `authenticatedUrl` startup error. The installed artifact was not recorded, and the cause remains under investigation; the attempt does not verify this package release.
