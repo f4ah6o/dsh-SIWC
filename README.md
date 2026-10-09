@@ -6,7 +6,7 @@ The current package is `@f12o/dsh-siwc`, with source and setup guidance in [`pac
 
 The package declares compatibility with the DSH `0.2.0-rc.2` and `0.2.1-alpha.1` API lines and their corresponding Cordis runtimes. Its build uses the published Typert generator with the narrow pinned patch in [`patches`](patches); the package tests check the generated Host Remote contract and OAuth lifecycle, while `pnpm run build` also builds the lazy Client entry point.
 
-Run `pnpm install`, `pnpm run build`, and `pnpm test` from this directory. Profile requirements, account setup, headless browser sign-in, and model configuration are in the [package README](packages/chatgpt/README.md).
+Run `pnpm install`, `pnpm run build`, and `pnpm test` from this directory. Profile requirements, account setup, headless browser sign-in, and model configuration are in the [package README](packages/chatgpt/README.md). Release operators can follow the [npm publishing guide](PUBLISHING.md).
 
 ## Install from npm
 

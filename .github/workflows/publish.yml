@@ -1,0 +1,168 @@
+name: Publish npm package
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_version:
+        description: Exact version from packages/chatgpt/package.json
+        required: true
+        type: string
+        default: '0.1.0-alpha.1'
+      dist_tag:
+        description: npm dist-tag for this prerelease
+        required: true
+        type: choice
+        options:
+          - alpha
+          - canary
+        default: alpha
+      dry_run:
+        description: Validate packaging and npm publish without uploading
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'f4ah6o/dsh-SIWC' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-24.04
+    environment: npm
+    steps:
+      - name: Check out main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.21.0
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Pin npm CLI
+        run: npm install --global npm@11.21.0 --registry=https://registry.npmjs.org
+
+      - name: Verify tool versions
+        shell: bash
+        run: |
+          test "$(node --version)" = 'v24.21.0'
+          test "$(pnpm --version)" = '11.7.0'
+          test "$(npm --version)" = '11.21.0'
+
+      - name: Validate release identity and version
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected_version }}
+          DIST_TAG: ${{ inputs.dist_tag }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs'
+
+          const manifest = JSON.parse(readFileSync('packages/chatgpt/package.json', 'utf8'))
+          const expected = {
+            name: '@f12o/dsh-siwc',
+            repositoryUrl: 'git+https://github.com/f4ah6o/dsh-SIWC.git',
+            repositoryDirectory: 'packages/chatgpt',
+            access: 'public',
+          }
+          const actual = {
+            name: manifest.name,
+            repositoryUrl: manifest.repository?.url,
+            repositoryDirectory: manifest.repository?.directory,
+            access: manifest.publishConfig?.access,
+          }
+
+          if (manifest.version !== process.env.EXPECTED_VERSION) {
+            throw new Error(`Expected version ${process.env.EXPECTED_VERSION}; package.json has ${manifest.version}`)
+          }
+          const releasePattern = new RegExp(`^\\d+\\.\\d+\\.\\d+-${process.env.DIST_TAG}\\.\\d+$`)
+          if (!releasePattern.test(manifest.version)) throw new Error(`Version must use the ${process.env.DIST_TAG} prerelease channel`)
+          for (const [key, value] of Object.entries(expected)) {
+            if (actual[key] !== value) throw new Error(`Unexpected package metadata for ${key}: ${actual[key]}`)
+          }
+          NODE
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm run build
+
+      - name: Typecheck package
+        run: pnpm run typecheck
+
+      - name: Test package
+        run: pnpm run test
+
+      - name: Pack the package leaf
+        id: pack
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pack_dir="$RUNNER_TEMP/dsh-siwc-pack"
+          mkdir -p "$pack_dir"
+          pnpm --filter @f12o/dsh-siwc pack --pack-destination "$pack_dir"
+          tarball="$pack_dir/f12o-dsh-siwc-${EXPECTED_VERSION}.tgz"
+          test -s "$tarball"
+          tar -xOf "$tarball" package/package.json > "$pack_dir/package.json"
+          PACKED_MANIFEST="$pack_dir/package.json" EXPECTED_VERSION="$EXPECTED_VERSION" node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs'
+
+          const manifest = JSON.parse(readFileSync(process.env.PACKED_MANIFEST, 'utf8'))
+          const expected = {
+            name: '@f12o/dsh-siwc',
+            version: process.env.EXPECTED_VERSION,
+            repositoryUrl: 'git+https://github.com/f4ah6o/dsh-SIWC.git',
+            repositoryDirectory: 'packages/chatgpt',
+            access: 'public',
+          }
+          const actual = {
+            name: manifest.name,
+            version: manifest.version,
+            repositoryUrl: manifest.repository?.url,
+            repositoryDirectory: manifest.repository?.directory,
+            access: manifest.publishConfig?.access,
+          }
+          for (const [key, value] of Object.entries(expected)) {
+            if (actual[key] !== value) throw new Error(`Unexpected packed package metadata for ${key}: ${actual[key]}`)
+          }
+          NODE
+          echo "tarball=$tarball" >> "$GITHUB_OUTPUT"
+
+      - name: Publish or dry-run
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+          DIST_TAG: ${{ inputs.dist_tag }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$DIST_TAG" in
+            alpha|canary) ;;
+            *) echo 'Unsupported npm dist-tag' >&2; exit 1 ;;
+          esac
+          case "$DRY_RUN" in
+            true|false) ;;
+            *) echo 'Invalid dry_run input' >&2; exit 1 ;;
+          esac
+          if [[ "$DRY_RUN" == true ]]; then
+            npm publish "$TARBALL" --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org --dry-run
+          else
+            npm publish "$TARBALL" --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org
+          fi
