@@ -47,6 +47,20 @@ describe('standalone Typert artifacts', () => {
       .create().safeParse({ accounts: [], welcomeAcknowledged: false, loginAttempts: [], loginPollIntervalMs: 1000 }).success).toBe(true)
   })
 
+  it('accepts every sign-out outcome and rejects unclassified reasons at the Remote boundary', () => {
+    const codec = TYPERT_REMOTE.descriptors.find(descriptor => descriptor.method === 'signOut')?.result.create()
+    expect(codec).toBeDefined()
+    for (const revocation of [
+      { status: 'confirmed' },
+      ...['metadata-unavailable', 'request-rejected', 'service-unavailable', 'network-error', 'request-timeout', 'unexpected-response']
+        .map(reason => ({ status: 'unconfirmed', reason })),
+      ...['already-signed-out', 'no-refresh-token'].map(reason => ({ status: 'not-attempted', reason })),
+    ]) {
+      expect(codec?.safeParse({ revocation, revocationConfirmed: revocation.status === 'confirmed' }).success).toBe(true)
+    }
+    expect(codec?.safeParse({ revocation: { status: 'unconfirmed', reason: 'private-response-body' }, revocationConfirmed: false }).success).toBe(false)
+  })
+
   it('rejects an ambient declaration that only imitates the protocol package', () => {
     const fixture = copyTypertFixture()
     const configPath = join(fixture, 'tsconfig.host.json')

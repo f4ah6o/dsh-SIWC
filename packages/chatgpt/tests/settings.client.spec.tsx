@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 /** Client sign-in reauthentication and first-use welcome behavior. */
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
 import type {
-  ChatGptAccountId, ChatGptAccountView, ChatGptLoginAttemptId, ChatGptState,
+  ChatGptAccountId, ChatGptAccountView, ChatGptLoginAttemptId, ChatGptRevocationResult, ChatGptState,
 } from '../src/types.ts'
 import { ChatGptSettingsSection, type ChatGptRemote } from '../src/client/ChatGptSettingsSection.tsx'
 import { en } from '../src/client/locales.ts'
@@ -78,7 +78,7 @@ function remoteFor(getState: () => Promise<ChatGptState>): ChatGptRemote {
     })),
     cancelLogin: vi.fn(async () => success(undefined)),
     setActiveAccount: vi.fn(async () => success(undefined)),
-    signOut: vi.fn(async () => success({ revocationConfirmed: true })),
+    signOut: vi.fn(async () => success({ revocation: { status: 'confirmed' as const }, revocationConfirmed: true })),
     refreshModels: vi.fn(async () => success(state())),
     setModelConfig: vi.fn(async () => success(state())),
     acknowledgeWelcome: vi.fn(async () => success(undefined)),
@@ -259,5 +259,93 @@ describe('ChatGptSettingsSection', () => {
       model: unknownModel.slug,
       config: { contextWindow: 98304, inputModalities: ['text'] },
     }))
+  })
+})
+
+describe('ChatGptSettingsSection sign-out and ChatGPT disconnection guidance', () => {
+  const outcomes: readonly { revocation: ChatGptRevocationResult; message: string; reason?: string }[] = [
+    { revocation: { status: 'confirmed' }, message: en.signOutRevocationConfirmed },
+    { revocation: { status: 'unconfirmed', reason: 'request-rejected' }, message: en.signOutRevocationUnconfirmed, reason: en.revocationRequestRejected },
+    { revocation: { status: 'unconfirmed', reason: 'metadata-unavailable' }, message: en.signOutRevocationUnconfirmed, reason: en.revocationMetadataUnavailable },
+    { revocation: { status: 'unconfirmed', reason: 'service-unavailable' }, message: en.signOutRevocationUnconfirmed, reason: en.revocationServiceUnavailable },
+    { revocation: { status: 'unconfirmed', reason: 'network-error' }, message: en.signOutRevocationUnconfirmed, reason: en.revocationNetworkError },
+    { revocation: { status: 'unconfirmed', reason: 'request-timeout' }, message: en.signOutRevocationUnconfirmed, reason: en.revocationRequestTimeout },
+    { revocation: { status: 'unconfirmed', reason: 'unexpected-response' }, message: en.signOutRevocationUnconfirmed, reason: en.revocationUnexpectedResponse },
+    { revocation: { status: 'not-attempted', reason: 'already-signed-out' }, message: en.signOutAlreadyLocal },
+    { revocation: { status: 'not-attempted', reason: 'no-refresh-token' }, message: en.signOutNoRefreshToken },
+  ]
+
+  it.each(outcomes)('shows $revocation.status / $revocation.reason without claiming that registration was removed', async ({ revocation, message, reason }) => {
+    let current = state({ accounts: [account], activeAccountId: account.id })
+    const remote = remoteFor(async () => current)
+    vi.mocked(remote.signOut).mockImplementation(async () => {
+      current = state({ accounts: [{ ...account, active: false, status: 'needs-sign-in', signOutRevocation: revocation }] })
+      return success({ revocation, revocationConfirmed: revocation.status === 'confirmed' })
+    })
+    mount(remote)
+    fireEvent.click(await screen.findByRole('button', { name: en.signOut }))
+    const dialog = await screen.findByRole('dialog', { name: en.confirmSignOut })
+    expect(dialog.textContent).toContain(en.confirmSignOutDescription)
+    fireEvent.click(within(dialog).getByRole('button', { name: en.confirm }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(remote.signOut).toHaveBeenCalledExactlyOnceWith({ accountId: account.id })
+    expect(screen.getByText(message, { exact: false })).toBeTruthy()
+    if (reason !== undefined) expect(screen.getByText(reason, { exact: false })).toBeTruthy()
+    expect(screen.getByText(en.disconnectDescription)).toBeTruthy()
+    expect(screen.getByRole('link', { name: en.manageConnection }).getAttribute('href')).toBe('https://chatgpt.com/settings/usage')
+    expect(screen.queryByRole('button', { name: en.signOut })).toBeNull()
+    if (revocation.status !== 'confirmed') expect(screen.queryByText(en.signOutRevocationConfirmed)).toBeNull()
+    if (revocation.status === 'not-attempted') expect(screen.queryByText(en.signOutRevocationUnconfirmed, { exact: false })).toBeNull()
+  })
+
+  it('keeps a previous unconfirmed warning after a repeated stale sign-out and remount', async () => {
+    const previous: ChatGptRevocationResult = { status: 'unconfirmed', reason: 'network-error' }
+    let current = state({ accounts: [{ ...account, signOutRevocation: previous }], activeAccountId: account.id })
+    const remote = remoteFor(async () => current)
+    vi.mocked(remote.signOut).mockImplementation(async () => {
+      current = state({ accounts: [{ ...account, active: false, status: 'needs-sign-in', signOutRevocation: previous }] })
+      return success({ revocation: { status: 'not-attempted', reason: 'already-signed-out' }, revocationConfirmed: false })
+    })
+    const view = mount(remote)
+    fireEvent.click(await screen.findByRole('button', { name: en.signOut }))
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: en.confirm }))
+    await screen.findByText(en.signOutRevocationUnconfirmed, { exact: false })
+    expect(screen.queryByText(en.signOutAlreadyLocal)).toBeNull()
+    expect(screen.queryByText(en.signOutRevocationConfirmed)).toBeNull()
+    view.unmount()
+    mount(remote)
+    await screen.findByText(en.signOutRevocationUnconfirmed, { exact: false })
+    expect(remote.signOut).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('button', { name: en.signOut })).toBeNull()
+  })
+
+  it('does not show a revocation warning for an old tokenless registration with unknown history', async () => {
+    const remote = remoteFor(async () => state({ accounts: [{ ...account, active: false, status: 'needs-sign-in' }] }))
+    mount(remote)
+    await screen.findByText(en.signInRequired)
+    expect(screen.queryByRole('button', { name: en.signOut })).toBeNull()
+    expect(screen.queryByText(en.signOutRevocationUnconfirmed)).toBeNull()
+    expect(screen.queryByText(en.signOutRevocationConfirmed)).toBeNull()
+    expect(screen.getByText(en.disconnectDescription)).toBeTruthy()
+  })
+
+  it('shows the completed local sign-out and warning when the subsequent state read fails', async () => {
+    let failed = false
+    const remote = remoteFor(async () => {
+      if (failed) throw new Error('synthetic-secret')
+      return state({ accounts: [account], activeAccountId: account.id })
+    })
+    vi.mocked(remote.signOut).mockImplementation(async () => {
+      failed = true
+      return success({ revocation: { status: 'unconfirmed', reason: 'network-error' }, revocationConfirmed: false })
+    })
+    mount(remote)
+    fireEvent.click(await screen.findByRole('button', { name: en.signOut }))
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: en.confirm }))
+    await screen.findByText(en.signOutRevocationUnconfirmed, { exact: false })
+    expect(screen.getByRole('alert').textContent).toContain(en.actionFailed)
+    expect(screen.queryByRole('button', { name: en.signOut })).toBeNull()
+    expect(document.body.textContent).not.toContain('synthetic-secret')
   })
 })

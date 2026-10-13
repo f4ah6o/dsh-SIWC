@@ -7,7 +7,7 @@ import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
 import { Button, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {
-  ChatGptAccountId, ChatGptAccountView, ChatGptLoginAttemptId, ChatGptModelConfig, ChatGptModelView, ChatGptState,
+  ChatGptAccountId, ChatGptAccountView, ChatGptLoginAttemptId, ChatGptModelConfig, ChatGptModelView, ChatGptRevocationResult, ChatGptState,
 } from '@f12o/dsh-siwc/types'
 import type { ChatGptKey } from './locales.ts'
 import css from './ChatGptSettingsSection.module.css'
@@ -36,6 +36,15 @@ interface LoginTicketView {
 }
 
 const USAGE_URL = 'https://chatgpt.com/settings/usage'
+
+const revocationReasonKeys: Readonly<Record<Extract<ChatGptRevocationResult, { status: 'unconfirmed' }>['reason'], ChatGptKey>> = {
+  'metadata-unavailable': 'revocationMetadataUnavailable',
+  'request-rejected': 'revocationRequestRejected',
+  'service-unavailable': 'revocationServiceUnavailable',
+  'network-error': 'revocationNetworkError',
+  'request-timeout': 'revocationRequestTimeout',
+  'unexpected-response': 'revocationUnexpectedResponse',
+}
 
 function loginPending(phase: ChatGptState['loginAttempts'][number]['phase']): boolean {
   return phase === 'awaiting-browser' || phase === 'exchanging'
@@ -67,7 +76,6 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<ErrorKey | undefined>(undefined)
   const [modelSaved, setModelSaved] = useState(false)
-  const [revocationWarning, setRevocationWarning] = useState(false)
   const [loginTickets, setLoginTickets] = useState<ReadonlyMap<ChatGptLoginAttemptId, LoginTicketView>>(() => new Map())
   const [signOutTarget, setSignOutTarget] = useState<ChatGptAccountView | undefined>(undefined)
   const [welcomeError, setWelcomeError] = useState(false)
@@ -165,7 +173,6 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
     setBusy(true)
     setError(undefined)
     setModelSaved(false)
-    setRevocationWarning(false)
     const generation = ++requestGeneration.current
     try {
       const result = await action()
@@ -291,8 +298,21 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
     const result = await mutate(() => remote.signOut({ accountId: account.id }).then(remoteValue))
     if (result === undefined) return
     setSignOutTarget(undefined)
+    // Show the completed local removal even if the subsequent state read fails.
+    setState(current => {
+      if (current === undefined) return current
+      const { activeAccountId, ...rest } = current
+      return {
+        ...rest,
+        ...(activeAccountId === undefined || activeAccountId === account.id ? {} : { activeAccountId }),
+        accounts: current.accounts.map(row => row.id !== account.id ? row : {
+          ...row, active: false, status: 'needs-sign-in', models: [],
+          signOutRevocation: result.revocation.status === 'not-attempted' && result.revocation.reason === 'already-signed-out'
+            ? row.signOutRevocation ?? result.revocation : result.revocation,
+        }),
+      }
+    })
     await refresh()
-    if (!result.revocationConfirmed) setRevocationWarning(true)
   }
 
   const acknowledgeWelcome = async (): Promise<void> => {
@@ -331,7 +351,6 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
 
       {error !== undefined && <p className={css.error} role="alert">{t(error)}</p>}
       {modelSaved && <p className={css.success} role="status">{t('modelSaved')}</p>}
-      {revocationWarning && <p className={css.warning} role="status">{t('signOutRevocationUnconfirmed')}</p>}
 
       <section className={css.card} aria-labelledby="chatgpt-accounts-title">
         <div className={css.cardHeader}>
@@ -351,13 +370,22 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
                   <span className={account.status === 'connected' ? css.statusReady : css.statusNeedsAction}>
                     {t(statusKey(account))}
                   </span>
+                  {account.status !== 'connected' && account.signOutRevocation !== undefined && <p
+                    className={account.signOutRevocation.status === 'unconfirmed'
+                      || (account.signOutRevocation.status === 'not-attempted' && account.signOutRevocation.reason === 'no-refresh-token')
+                      ? css.warning : css.secondary} role="status">
+                    {account.signOutRevocation.status === 'confirmed' ? t('signOutRevocationConfirmed')
+                      : account.signOutRevocation.status === 'unconfirmed'
+                        ? <>{t('signOutRevocationUnconfirmed')} {t(revocationReasonKeys[account.signOutRevocation.reason])}</>
+                        : t(account.signOutRevocation.reason === 'no-refresh-token' ? 'signOutNoRefreshToken' : 'signOutAlreadyLocal')}
+                  </p>}
                 </div>
                 <div className={css.accountActions}>
                   {account.status !== 'connected' && <Button variant="primary" className={css.signInButton}
                     icon={<span className={css.signInLogo} aria-hidden="true" />} disabled={busy}
                     onClick={() => { void beginLogin(account.id) }}>{t('continueWithChatGPT')}</Button>}
-                  <Button variant="ghost" size="sm" disabled={busy}
-                    onClick={() => { setSignOutTarget(account) }}>{t('signOut')}</Button>
+                  {account.status === 'connected' && <Button variant="ghost" size="sm" disabled={busy}
+                    onClick={() => { setSignOutTarget(account) }}>{t('signOut')}</Button>}
                 </div>
               </li>
             ))}
@@ -379,6 +407,8 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
             </option>)}
           </select>
         </label>
+        <p className={css.secondary}>{t('disconnectDescription')}</p>
+        <a className={css.inlineLink} href={USAGE_URL} target="_blank" rel="noopener noreferrer">{t('manageConnection')}</a>
       </section>
 
       {state.loginAttempts.map(attempt => {

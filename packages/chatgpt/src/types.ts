@@ -2,7 +2,7 @@
 import type { Branded } from '@deepseek-ai/dsh-brand'
 import type { ModelModality } from '@deepseek-ai/dsh-llm'
 
-/** Opaque profile-scoped identity for one ChatGPT account registration. */
+/** Opaque identity for one ChatGPT account registration in the shared DSH home. */
 export type ChatGptAccountId = Branded<'ChatGptAccountId'>
 
 /** Opaque Host-local handle for one pending sign-in attempt. */
@@ -40,7 +40,7 @@ export interface ChatGptModelView extends ChatGptModelConfig {
 
 /** Safe summary of one account registration; token values never cross Remote. */
 export interface ChatGptAccountView {
-  /** Opaque profile-scoped account identity. */
+  /** Opaque account identity shared by profiles using the same DSH home. */
   readonly id: ChatGptAccountId
   /** Display label, falling back to the account's redacted identifier. */
   readonly label: string
@@ -50,6 +50,8 @@ export interface ChatGptAccountView {
   readonly active: boolean
   /** Credential and dynamic-client registration state, without secret details. */
   readonly status: 'connected' | 'needs-registration' | 'needs-sign-in'
+  /** Last sign-out outcome; contains no credentials and survives a Host restart. */
+  readonly signOutRevocation?: ChatGptRevocationResult
   /** Server model catalog filtered to rows with `visibility: "list"`. */
   readonly models: readonly ChatGptModelView[]
 }
@@ -92,9 +94,22 @@ export interface ChatGptLoginRequest {
   readonly accountId?: ChatGptAccountId
 }
 
-/** Result of local logout and the best-effort OpenAI token revocation. */
+/** Credential-free result of attempting to end the renewable OpenAI session. */
+export type ChatGptRevocationResult =
+  | { readonly status: 'confirmed' }
+  | {
+    readonly status: 'unconfirmed'
+    readonly reason: 'metadata-unavailable' | 'request-rejected' | 'service-unavailable'
+      | 'network-error' | 'request-timeout' | 'unexpected-response'
+  }
+  | { readonly status: 'not-attempted'; readonly reason: 'already-signed-out' | 'no-refresh-token' }
+
+/** Result returned only after local tokens have been cleared. */
 export interface ChatGptSignOutResult {
+  /** Outcome of this call; a repeated local sign-out does not make a new remote claim. */
+  readonly revocation: ChatGptRevocationResult
   /** Whether OpenAI confirmed revocation of the saved renewable session. */
+  /** @deprecated Use revocation; false also includes calls that did not attempt revocation. */
   readonly revocationConfirmed: boolean
 }
 

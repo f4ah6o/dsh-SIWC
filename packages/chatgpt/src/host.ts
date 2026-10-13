@@ -16,7 +16,7 @@ import {
 } from './oauth.js'
 import type { OAuthGrant, OAuthIdentityExpectation, OAuthRegistration } from './oauth.js'
 import { officialOpenAiModel, toOpenAiModelInfo, toOpenAiResolvedModelInfo } from './models.js'
-import type { ChatGptAccountId, ChatGptAccountView, ChatGptLoginAttemptId, ChatGptLoginAttemptView, ChatGptModelConfig, ChatGptModelOverride, ChatGptModelView, ChatGptState } from './types.js'
+import type { ChatGptAccountId, ChatGptAccountView, ChatGptLoginAttemptId, ChatGptLoginAttemptView, ChatGptModelConfig, ChatGptModelOverride, ChatGptModelView, ChatGptRevocationResult, ChatGptSignOutResult, ChatGptState } from './types.js'
 import type {} from '@deepseek-ai/dsh-config-editor'
 
 const CREDENTIAL_SCOPE = 'dsh-chatgpt'
@@ -48,6 +48,7 @@ interface StoredAccount {
   readonly scopes?: readonly string[]
   readonly createdAt: number
   readonly status: 'connected' | 'needs-sign-in'
+  readonly signOutRevocation?: ChatGptRevocationResult
 }
 
 interface CatalogModel {
@@ -377,7 +378,7 @@ export class ChatGptHost implements ChatGptAdapterHost {
   }
 
   /** Revoke and locally disconnect one account while stopping its in-flight model calls. */
-  async signOut(accountId: ChatGptAccountId): Promise<{ revocationConfirmed: boolean }> {
+  async signOut(accountId: ChatGptAccountId): Promise<ChatGptSignOutResult> {
     const key = accountKey(accountId)
     const accountController = this.accountControllers.get(String(accountId)) ?? new AbortController()
     this.accountControllers.set(String(accountId), accountController)
@@ -393,16 +394,18 @@ export class ChatGptHost implements ChatGptAdapterHost {
       await this.authorizationRuns.get(key)
       await attempt.authorizationRun
     }
-    let revocationConfirmed = false
+    const result: { revocation: ChatGptRevocationResult } = { revocation: { status: 'not-attempted', reason: 'already-signed-out' } }
     const next = await this.ctx.credentials.modifyRecord(key, async current => {
       if (current === undefined) return undefined
       const account = readAccount(current, String(accountId))
-      if (account.status === 'connected' && typeof account.refreshToken === 'string' && account.refreshToken.length > 0) {
-        revocationConfirmed = await revokeRefreshToken({
+      if (typeof account.refreshToken === 'string' && account.refreshToken.length > 0) {
+        result.revocation = await revokeRefreshToken({
           clientId: account.clientId,
           refreshToken: account.refreshToken,
           requestTimeoutMs: this.config.requestTimeoutMs.get(),
         })
+      } else {
+        result.revocation = { status: 'not-attempted', reason: account.status === 'connected' ? 'no-refresh-token' : 'already-signed-out' }
       }
       return {
         kind: 'grant',
@@ -415,6 +418,10 @@ export class ChatGptHost implements ChatGptAdapterHost {
           ...(account.email === undefined ? {} : { email: account.email }),
           createdAt: account.createdAt,
           status: 'needs-sign-in',
+          // Retain only safe metadata, never a token for a later retry. Repeated sign-out
+          // must not overwrite a previous unconfirmed outcome with apparent success.
+          signOutRevocation: result.revocation.status === 'not-attempted' && result.revocation.reason === 'already-signed-out'
+            ? account.signOutRevocation ?? result.revocation : result.revocation,
         },
       }
     })
@@ -425,7 +432,7 @@ export class ChatGptHost implements ChatGptAdapterHost {
       this.activeInMemoryAccountId = undefined
       await this.persistConfig({ activeAccountId: undefined })
     }
-    return { revocationConfirmed }
+    return { revocation: result.revocation, revocationConfirmed: result.revocation.status === 'confirmed' }
   }
 
   /** Refresh one account's list-visible model catalog and return the updated state. */
@@ -953,6 +960,7 @@ export class ChatGptHost implements ChatGptAdapterHost {
       ...(account.email === undefined ? {} : { email: account.email }),
       active: activeId === account.accountId,
       status: account.status,
+      ...(account.signOutRevocation === undefined ? {} : { signOutRevocation: account.signOutRevocation }),
       models,
     }
   }
@@ -1002,6 +1010,7 @@ function readHost(record: CredentialRecord | undefined): StoredHost {
 
 function readAccount(record: CredentialRecord, accountId: string): StoredAccount {
   const payload = grantPayload(record, 'ChatGPT account')
+  const signOutRevocation = readSignOutRevocation(payload.signOutRevocation)
   if (payload.version !== 1 || payload.accountId !== accountId || typeof payload.clientId !== 'string'
     || typeof payload.subject !== 'string' || typeof payload.createdAt !== 'number'
     || (payload.status !== 'connected' && payload.status !== 'needs-sign-in')) {
@@ -1033,7 +1042,26 @@ function readAccount(record: CredentialRecord, accountId: string): StoredAccount
       : {}),
     createdAt: payload.createdAt,
     status: payload.status,
+    ...(signOutRevocation === undefined ? {} : { signOutRevocation }),
   }
+}
+
+/** Whitelist persisted metadata before exposing it across Remote. */
+function readSignOutRevocation(value: unknown): ChatGptRevocationResult | undefined {
+  if (value === null || typeof value !== 'object') return undefined
+  const result = value as Record<string, unknown>
+  if (result.status === 'confirmed') return { status: 'confirmed' }
+  if (result.status === 'not-attempted'
+    && (result.reason === 'already-signed-out' || result.reason === 'no-refresh-token')) {
+    return { status: 'not-attempted', reason: result.reason }
+  }
+  if (result.status === 'unconfirmed'
+    && (result.reason === 'metadata-unavailable' || result.reason === 'request-rejected'
+      || result.reason === 'service-unavailable' || result.reason === 'network-error'
+      || result.reason === 'request-timeout' || result.reason === 'unexpected-response')) {
+    return { status: 'unconfirmed', reason: result.reason }
+  }
+  return undefined
 }
 
 function grantPayload(record: CredentialRecord | undefined, label: string): Record<string, unknown> {
