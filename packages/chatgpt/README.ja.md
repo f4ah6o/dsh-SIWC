@@ -100,7 +100,7 @@ dsh --profile headless --patch /tmp/chatgpt-login.patch.yml "ChatGPT を使う�
 
 ローカルのサインアウト、更新可能なセッションの失効、ChatGPT 側のアプリ登録の削除は別の操作です。Host は失効結果を `confirmed`、秘密情報を含まない固定理由付きの `unconfirmed`、`not-attempted` に区別します。HTTP 200 はすでに無効なトークンを含めて失効確認を意味し、ネットワーク障害や 5xx ではトークンがメモリーにある間だけ一度再試行します。確認の成否にかかわらずローカルトークンを削除し、後日の再試行用に秘密を残しません。最後のサインアウト結果だけを安全なメタデータとして残すため、再サインアウトや再起動で以前の未確認状態が成功に変わることはありません。再認証が成功すると以前の結果を消去します。
 
-失効は登録済みクライアントを削除しないため、サインアウト後も ChatGPT の接続一覧にアプリが残ることがあります。一覧から切断するには、ChatGPT の設定で「アプリ」または「プラグイン」（画面によって名称が異なります）からこのアプリを選び、「切断」を実行してください。OpenAI の[アカウントとセッションの仕様](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)と[接続管理の公式ヘルプ](https://help.openai.com/en/articles/20001494-connecting-and-managing-app-accounts-in-chatgpt)を参照してください。このプラグインはアプリ登録削除 API を呼び出しません。
+失効は登録済みクライアントを削除しないため、サインアウト後も ChatGPT の接続一覧にアプリが残ることがあります。接続を解除するには、ChatGPT の設定で「Security and login」→「Login connections」→「Sign in with ChatGPT」からこのアプリを選び、「Manage connection」→「Disconnect」を実行し、もう一度「Disconnect」を選んで確認してください。ChatGPT プランを使わないサインイン専用の接続では「Manage connection」や「Disconnect」が表示されない場合があります。その場合はアプリ内でサインアウトしてローカルセッションを終了してください。サインアウトと ChatGPT 側の接続解除は別の操作です。OpenAI の[アカウントとセッションの仕様](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)と[SIWC 接続解除の公式手順](https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites)を参照してください。設定画面のリンクもこの公式手順を開きます。このプラグインはアプリ登録削除 API を呼び出しません。
 
 ### モデルと能力を選ぶ
 

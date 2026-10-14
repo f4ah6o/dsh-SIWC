@@ -293,7 +293,7 @@ describe('ChatGptSettingsSection sign-out and ChatGPT disconnection guidance', (
     expect(screen.getByText(message, { exact: false })).toBeTruthy()
     if (reason !== undefined) expect(screen.getByText(reason, { exact: false })).toBeTruthy()
     expect(screen.getByText(en.disconnectDescription)).toBeTruthy()
-    expect(screen.getByRole('link', { name: en.manageConnection }).getAttribute('href')).toBe('https://chatgpt.com/settings/usage')
+    expect(screen.getByRole('link', { name: en.manageConnection }).getAttribute('href')).toBe('https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites')
     expect(screen.queryByRole('button', { name: en.signOut })).toBeNull()
     if (revocation.status !== 'confirmed') expect(screen.queryByText(en.signOutRevocationConfirmed)).toBeNull()
     if (revocation.status === 'not-attempted') expect(screen.queryByText(en.signOutRevocationUnconfirmed, { exact: false })).toBeNull()

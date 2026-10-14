@@ -36,6 +36,7 @@ interface LoginTicketView {
 }
 
 const USAGE_URL = 'https://chatgpt.com/settings/usage'
+const DISCONNECTION_HELP_URL = 'https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites'
 
 const revocationReasonKeys: Readonly<Record<Extract<ChatGptRevocationResult, { status: 'unconfirmed' }>['reason'], ChatGptKey>> = {
   'metadata-unavailable': 'revocationMetadataUnavailable',
@@ -408,7 +409,7 @@ export function ChatGptSettingsSection({ remote, trackAttempt, finishAttempt, t 
           </select>
         </label>
         <p className={css.secondary}>{t('disconnectDescription')}</p>
-        <a className={css.inlineLink} href={USAGE_URL} target="_blank" rel="noopener noreferrer">{t('manageConnection')}</a>
+        <a className={css.inlineLink} href={DISCONNECTION_HELP_URL} target="_blank" rel="noopener noreferrer">{t('manageConnection')}</a>
       </section>
 
       {state.loginAttempts.map(attempt => {

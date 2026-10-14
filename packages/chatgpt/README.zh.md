@@ -100,7 +100,7 @@ dsh --profile headless --patch /tmp/chatgpt-login.patch.yml "运行一个使用 
 
 本地退出登录、撤销可续期会话和删除 ChatGPT 中的应用注册是不同的操作。Host 将撤销结果区分为 `confirmed`、带不含凭据的固定原因的 `unconfirmed` 和 `not-attempted`。HTTP 200 表示已确认撤销，包括已失效的令牌；网络故障或 5xx 响应会在令牌仍在内存中时重试一次。无论是否确认，本地令牌都会删除，也不会为日后重试保留秘密。最后一次退出登录的结果仅作为安全元数据保存，因此再次退出或重启不会把先前未确认的结果变成成功。重新登录成功后会清除旧结果。
 
-撤销不会删除已注册的客户端，因此退出后应用仍可能出现在 ChatGPT 的连接列表中。要在那里断开连接，请打开 ChatGPT 设置，在应用或插件（名称因界面而异）中选择此应用，然后选择断开连接。参阅 OpenAI 的[账号与会话规范](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)和[连接管理帮助](https://help.openai.com/en/articles/20001494-connecting-and-managing-app-accounts-in-chatgpt)。本插件不会调用应用注册删除 API。
+撤销不会删除已注册的客户端，因此退出后应用仍可能出现在 ChatGPT 的连接列表中。要断开连接，请在 ChatGPT 设置中打开「Security and login」→「Login connections」→「Sign in with ChatGPT」，选择此应用，再选择「Manage connection」→「Disconnect」，并再次选择「Disconnect」确认。不使用 ChatGPT 订阅的仅登录连接可能不显示「Manage connection」或「Disconnect」；此时请在应用内退出登录以结束本地会话。退出登录与在 ChatGPT 中断开连接是不同的操作。参阅 OpenAI 的[账号与会话规范](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)和[SIWC 断开连接官方步骤](https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites)。设置界面的链接也会打开这些官方步骤。本插件不会调用应用注册删除 API。
 
 ### 选择模型和能力
 
