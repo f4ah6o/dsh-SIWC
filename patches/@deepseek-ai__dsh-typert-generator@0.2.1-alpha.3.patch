@@ -1,7 +1,11 @@
 diff --git a/lib/index.js b/lib/index.js
+index 4f756e696acf1c4a80cd03a757592d626f059527..19a8994b70567d71426b1b9e0ecea8af92798747 100644
 --- a/lib/index.js
 +++ b/lib/index.js
-@@ -1403 +1403,9 @@
+@@ -1642,7 +1642,15 @@ var FaceAnalyzer = class {
+ 		const declaration = preferredDeclaration(resolved);
+ 		if (declaration === void 0) return false;
+ 		if (this.registrationForFile(declaration.getSourceFile().fileName)?.name === "@deepseek-ai/dsh-typert-protocol") return true;
 -		for (let current = declaration; current !== void 0; current = optionalParent(current)) if (ts.isModuleDeclaration(current) && ts.isStringLiteral(current.name) && current.name.text === "@deepseek-ai/dsh-typert-protocol") return true;
 +		const externalProtocol = externalProtocolManifestForFile(declaration.getSourceFile().fileName);
 +		if (externalProtocol !== void 0) {
@@ -12,7 +16,13 @@ diff --git a/lib/index.js b/lib/index.js
 +				if (module !== void 0 && this.checker.getExportsOfModule(module).some((exported) => this.resolveSymbol(exported) === resolved)) return true;
 +			}
 +		}
-@@ -2117,1 +2125,13 @@
+ 		return false;
+ 	}
+ 	validateInvocationIdentity(packages) {
+@@ -2372,6 +2380,18 @@ function sourcePathForExport(packageRoot, target) {
+ 	if (normalized.startsWith("lib/")) return resolve(packageRoot, "src", normalized.slice(4).replace(/\.(?:mjs|cjs|js|d\.ts)$/, ".ts"));
+ 	return resolve(packageRoot, normalized);
+ }
 +function externalProtocolManifestForFile(fileName) {
 +	let current = dirname(realPath(fileName));
 +	while (current !== dirname(current)) {
@@ -26,10 +36,13 @@ diff --git a/lib/index.js b/lib/index.js
 +	return void 0;
 +}
  function preferredDeclaration(symbol) {
+ 	return symbol.declarations?.find(isTypeDeclaration) ?? symbol.valueDeclaration ?? symbol.declarations?.[0];
+ }
 diff --git a/lib/types/analyzer.js b/lib/types/analyzer.js
+index e163a91fc21fe0584af72dd18bd4e63ca022cdf7..004731b2d4dd0b35a6a66dea1c247bf04e3f444b 100644
 --- a/lib/types/analyzer.js
 +++ b/lib/types/analyzer.js
-@@ -1719,11 +1719,16 @@
+@@ -1798,11 +1798,16 @@ class FaceAnalyzer {
          const registration = this.registrationForFile(declaration.getSourceFile().fileName);
          if (registration?.name === '@deepseek-ai/dsh-typert-protocol')
              return true;
@@ -51,7 +64,7 @@ diff --git a/lib/types/analyzer.js b/lib/types/analyzer.js
          }
          return false;
      }
-@@ -2555,6 +2560,20 @@
+@@ -2658,6 +2663,20 @@ function sourcePathForExport(packageRoot, target) {
      }
      return resolve(packageRoot, normalized);
  }

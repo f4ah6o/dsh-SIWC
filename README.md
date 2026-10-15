@@ -4,7 +4,7 @@ Sign in with ChatGPT on deepseek harness
 
 The current package is `@f12o/dsh-siwc`, with source and setup guidance in [`packages/chatgpt`](packages/chatgpt/README.md). The planned first npm release is `@f12o/dsh-siwc@0.1.0-alpha.1` with the `alpha` dist-tag; publication is pending. Its packed workspace tarball is not yet published. The preserved v5 artifact under the former identity `@f4ah6o/dsh-chatgpt@0.1.0` is historical only. This repository has no build-time dependency on a sibling DeepSeek Harness checkout.
 
-The package declares compatibility with the DSH `0.2.0-rc.2` and `0.2.1-alpha.1` API lines and their corresponding Cordis runtimes. Its build uses the published Typert generator with the narrow pinned patch in [`patches`](patches); the package tests check the generated Host Remote contract and OAuth lifecycle, while `pnpm run build` also builds the lazy Client entry point.
+The package declares compatibility with the DSH `0.2.0-rc.2` and `0.2.1-alpha.1` through `0.2.1-alpha.3` API lines and their corresponding Cordis runtimes. Its build uses the published Typert generator with the narrow pinned patch in [`patches`](patches); the package tests check the generated Host Remote contract and OAuth lifecycle, while `pnpm run build` also builds the lazy Client entry point.
 
 Run `pnpm install`, `pnpm run build`, and `pnpm test` from this directory. Profile requirements, account setup, headless browser sign-in, and model configuration are in the [package README](packages/chatgpt/README.md). Release operators can follow the [npm publishing guide](PUBLISHING.md).
 

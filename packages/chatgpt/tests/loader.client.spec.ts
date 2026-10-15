@@ -6,8 +6,10 @@ import Loader from '@deepseek-ai/cordis-plugin-loader'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { createElement, type ComponentType } from 'react'
+import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
 import { readFileSync } from 'node:fs'
 import type { ClientConnectionRpc } from '@deepseek-ai/dsh-client-connection/client'
 import type * as GatewayClient from '@deepseek-ai/dsh-api-gateway/client'
@@ -24,6 +26,34 @@ import * as client from '../src/client/index.ts'
 const contexts: Context[] = []
 const nodeRequire = createRequire(import.meta.url)
 
+/** Resolve the browser Client bundle even when Node resolution prefers the ESM Node entry. */
+function resolveClientBrowserBundle(specifier: string): string {
+  const packageName = specifier.startsWith('@')
+    ? specifier.split('/').slice(0, 2).join('/')
+    : specifier.split('/')[0] as string
+  const resolved = nodeRequire.resolve(specifier)
+  let current = dirname(resolved)
+  while (true) {
+    const manifestPath = join(current, 'package.json')
+    try {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+        readonly name?: string
+        readonly exports?: Record<string, string | Record<string, string>>
+      }
+      if (manifest.name === packageName) {
+        const client = manifest.exports?.['./client']
+        const browser = typeof client === 'string' ? undefined : client?.['browser']
+        if (browser !== undefined) return join(current, browser.replace(/^\.\//, ''))
+      }
+    } catch {
+      // Continue walking toward the filesystem root.
+    }
+    const parent = dirname(current)
+    if (parent === current) return resolved
+    current = parent
+  }
+}
+
 interface ClientArtifactRegistration {
   id: string
   factory: (require: (specifier: string) => unknown) => Record<string, unknown>
@@ -39,13 +69,14 @@ function loadClientArtifact(specifier: string): Record<string, unknown> {
   ;(window as ClientArtifactWindow).__ModuleLoader__ = {
     load: (value) => { registration = value },
   }
-  const source = readFileSync(nodeRequire.resolve(specifier), 'utf8')
+  const source = readFileSync(resolveClientBrowserBundle(specifier), 'utf8')
   // This executes the package's generated browser bundle in jsdom, as the shell does when a script registers.
   // oxlint-disable-next-line typescript/no-implied-eval, typescript/no-unsafe-call
   new Function(source)()
   if (registration === undefined) throw new Error(`Client bundle did not register: ${specifier}`)
   return registration.factory((name) => {
     if (name === '@deepseek-ai/cordis') return Cordis
+    if (name === 'zod') return { z }
     throw new Error(`unexpected Client bundle import: ${name}`)
   })
 }

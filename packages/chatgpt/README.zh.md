@@ -26,12 +26,12 @@ kind: "package-bundle"
 
 ### 从 npm 安装
 
-npm 发布预发布版 `0.1.0-alpha.2` 后，在每个需要使用 ChatGPT 的 profile 中添加 bundle：
+npm 发布预发布版 `0.1.0-alpha.3` 后，在每个需要使用 ChatGPT 的 profile 中添加 bundle：
 
 ```sh
-dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.2
-dsh plugin --profile headless add @f12o/dsh-siwc@0.1.0-alpha.2
-dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0-alpha.2
+dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.3
+dsh plugin --profile headless add @f12o/dsh-siwc@0.1.0-alpha.3
+dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0-alpha.3
 ```
 
 通过 Desktop CLI 安装时，先启动应用一次以创建 profile，然后在执行 package 命令前彻底退出应用。请使用该 release 自带的 `dsh` CLI，不要使用 `PATH` 中的其他 `dsh`。当前 fork 将 CLI 放在 `resources/runtime/cli/bin/dsh`（Windows 为 `dsh.cmd`），请确认已安装 release 的实际路径。创建 profile 后，也可以使用 Desktop 自带的 Plugin Manager 安装。通过 CLI 操作 package 后再重新打开 Desktop。
@@ -40,7 +40,7 @@ dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0-alpha.2
 
 ```sh
 dsh plugin --profile <profile> remove @f4ah6o/dsh-chatgpt
-dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0-alpha.2
+dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0-alpha.3
 ```
 
 旧 package 和新 package 使用相同的 provider identity、Remote namespace 和 credential ID。保留相同的 `$DSH_HOME` 即可保留 Credentials store；有效的已保存 grant 无需重新登录即可使用，但过期或已撤销的 grant 可能需要重新登录。Desktop 中的两条命令都要在应用退出时通过其自带 CLI 执行。
@@ -51,12 +51,12 @@ dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0-alpha.2
 
 ```sh
 pnpm --dir packages/chatgpt pack
-dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.2.tgz
-dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.2.tgz
-dsh plugin --profile desktop add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.2.tgz
+dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
+dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
+dsh plugin --profile desktop add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
 ```
 
-bundle 会添加 ChatGPT plugin 配置项。运行 `dsh plugin --profile <profile> remove @f12o/dsh-siwc` 可移除该项。已验证的 DSH Host API 版本为 `0.2.0-rc.2` 和 `0.2.1-alpha.1`。
+bundle 会添加 ChatGPT plugin 配置项。运行 `dsh plugin --profile <profile> remove @f12o/dsh-siwc` 可移除该项。已验证的 DSH Host API 版本为 `0.2.0-rc.2` 和 `0.2.1-alpha.1` 至 `0.2.1-alpha.3`。
 
 Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`desktop`、`headless`、`sdk` profile 通过 `dsh-base` 提供这些服务。bundle 还会添加启动检查。DSH launcher 发出 readiness 信号时，检查会报告启用的 ChatGPT Host entry 缺少哪些服务并中止启动；如果 Host entry 已禁用或删除，则跳过检查。独立的 `sdk-minimal` profile 不包含 Credentials 和 Authorization。请在该 profile 中安装与 DSH 版本匹配的 provider package，并在其 `cordis.patch.yml` 中添加对应 entry：
 
@@ -64,7 +64,7 @@ Host 需要 DSH Credentials、Authorization 和 LLM 服务。随附的 `web`、`
 pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
 ```
 
-若 DSH 版本为 `0.2.1-alpha.1`，两个 package 都使用 `0.2.1-alpha.1`；请勿混用两条 DSH API 版本线。安装 ChatGPT bundle 后，添加以下 entry：
+两个 package 都应与 DSH 版本匹配（例如 DSH `0.2.1-alpha.3` 使用 `0.2.1-alpha.3`）；请勿混用 DSH API 版本线。安装 ChatGPT bundle 后，添加以下 entry：
 
 ```yaml
 - insert:

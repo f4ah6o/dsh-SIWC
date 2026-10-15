@@ -30,8 +30,11 @@ describe('standalone Typert artifacts', () => {
     const remote = result?.remote
     expect(remote).toBeDefined()
     expect(remote?.dts).toContain('declare module \'@deepseek-ai/dsh-typert-protocol\'')
-    for (const method of methods) expect(remote?.dts).toContain(`${method}:`)
-    expect(remote?.js.match(/id: '@f12o\/dsh-siwc#chatgpt\//gu)).toHaveLength(methods.length)
+    for (const method of methods) {
+      expect(remote?.dts).toContain(`${method}:`)
+      expect(remote?.js).toContain(`'chatgpt/${method}':`)
+    }
+    expect(remote?.js.match(/'chatgpt\/[A-Za-z]+':/gu)).toHaveLength(methods.length)
   })
 
   it('ships the complete tsdown-generated Client contribution and strict codecs', () => {

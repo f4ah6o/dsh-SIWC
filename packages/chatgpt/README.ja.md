@@ -26,12 +26,12 @@ kind: "package-bundle"
 
 ### npm からインストール
 
-npm で prerelease `0.1.0-alpha.2` が公開された後、ChatGPT を使う各 profile に bundle を追加します。
+npm で prerelease `0.1.0-alpha.3` が公開された後、ChatGPT を使う各 profile に bundle を追加します。
 
 ```sh
-dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.2
-dsh plugin --profile headless add @f12o/dsh-siwc@0.1.0-alpha.2
-dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0-alpha.2
+dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.3
+dsh plugin --profile headless add @f12o/dsh-siwc@0.1.0-alpha.3
+dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0-alpha.3
 ```
 
 Desktop の CLI から install する場合は、最初にアプリケーションを一度起動して profile を作成し、package 操作の前に完全に終了してください。その release が同梱する `dsh` CLI を使い、`PATH` 上の別の `dsh` は使わないでください。現在の fork では CLI は `resources/runtime/cli/bin/dsh`（Windows では `dsh.cmd`）にあります。インストール済み release のパスを確認してください。profile 作成後は Desktop の Plugin Manager からも install できます。CLI の package 操作後に Desktop を再起動します。
@@ -40,7 +40,7 @@ profile に旧 package `@f4ah6o/dsh-chatgpt` が入っている場合は、同�
 
 ```sh
 dsh plugin --profile <profile> remove @f4ah6o/dsh-chatgpt
-dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0-alpha.2
+dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0-alpha.3
 ```
 
 旧 package と新 package は同じ provider identity、Remote namespace、credential ID を使います。同じ `$DSH_HOME` を保つと Credentials store はそのまま使えます。有効な保存済み grant なら再サインインは不要ですが、期限切れまたは revoke 済みの場合はサインインが必要になることがあります。Desktop ではアプリケーションを終了した状態で、どちらのコマンドも同梱 CLI から実行してください。
@@ -51,12 +51,12 @@ checkout からインストールする場合は、standalone plugin を Pack �
 
 ```sh
 pnpm --dir packages/chatgpt pack
-dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.2.tgz
-dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.2.tgz
-dsh plugin --profile desktop add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.2.tgz
+dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
+dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
+dsh plugin --profile desktop add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
 ```
 
-bundle は ChatGPT plugin 行を追加します。削除する場合は `dsh plugin --profile <profile> remove @f12o/dsh-siwc` を実行します。Host API の対応確認済み DSH バージョンは `0.2.0-rc.2` と `0.2.1-alpha.1` です。
+bundle は ChatGPT plugin 行を追加します。削除する場合は `dsh plugin --profile <profile> remove @f12o/dsh-siwc` を実行します。Host API の対応確認済み DSH バージョンは `0.2.0-rc.2` と `0.2.1-alpha.1` から `0.2.1-alpha.3` です。
 
 Host には DSH Credentials、Authorization、LLM サービスが必要です。付属の `web`、`desktop`、`headless`、`sdk` profile は `dsh-base` 経由でこれらを含みます。bundle は起動チェックも追加します。DSH launcher の readiness 通知時に、有効な ChatGPT Host entry の不足サービスを報告して起動を失敗させます。Host entry が無効または削除済みならチェックを省略します。独立した `sdk-minimal` profile には Credentials と Authorization がありません。該当 profile に DSH と同じバージョンの provider package を追加し、`cordis.patch.yml` に entry を追加します。
 
@@ -64,7 +64,7 @@ Host には DSH Credentials、Authorization、LLM サービスが必要です。
 pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
 ```
 
-DSH が `0.2.1-alpha.1` の場合は両方の package に `0.2.1-alpha.1` を使い、異なる DSH API バージョンを混在させないでください。ChatGPT bundle を追加した後、次の entry を配置します。
+両方の package は DSH のバージョンに合わせ（例: DSH `0.2.1-alpha.3` には `0.2.1-alpha.3`）、異なる DSH API バージョンを混在させないでください。ChatGPT bundle を追加した後、次の entry を配置します。
 
 ```yaml
 - insert:
