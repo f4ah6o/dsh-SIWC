@@ -9,7 +9,7 @@ import { exportJWK, generateKeyPair, SignJWT } from 'jose'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ChatGptHost } from '../src/host.js'
 import type { Config } from '../src/config.js'
-import type { ChatGptAccountId, ChatGptModelOverride } from '../src/types.js'
+import type { ChatGptAccountId, ChatGptModelOverride, ChatGptRevocationResult } from '../src/types.js'
 
 const scopes = ['openid', 'profile', 'email', 'offline_access', 'resource.invoke', 'chatgpt.tokens.use.direct']
 const homes: string[] = []
@@ -847,5 +847,152 @@ describe('ChatGPT Host account selection and request pinning', () => {
     expect(calls.map(call => call.accessToken)).toEqual(['rotated-access-token', 'rotated-access-token'])
     await expect(first.ctx.credentials.readRecord(credentialKey('dsh-chatgpt', accountId)))
       .resolves.toMatchObject({ payload: { refreshToken: 'rotated-refresh-token' } })
+  })
+})
+
+describe('ChatGPT Host local sign-out and remote revocation', () => {
+  const endpoint = 'https://auth.openai.com/api/accounts/oauth/revoke'
+  const metadata = () => new Response(JSON.stringify({
+    issuer: 'https://auth.openai.com',
+    jwks_uri: 'https://auth.openai.com/.well-known/jwks.json',
+    revocation_endpoint: endpoint,
+  }), { status: 200, headers: { 'content-type': 'application/json' } })
+
+  it.each([
+    { name: 'HTTP 200', respond: () => Promise.resolve(new Response(null, { status: 200 })), expected: { status: 'confirmed' } },
+    { name: 'HTTP refusal', respond: () => Promise.resolve(new Response('synthetic-secret', { status: 400 })), expected: { status: 'unconfirmed', reason: 'request-rejected' } },
+    { name: 'temporary failure', respond: () => Promise.resolve(new Response(null, { status: 503 })), expected: { status: 'unconfirmed', reason: 'service-unavailable' } },
+    { name: 'network failure', respond: () => Promise.reject(new Error('synthetic-secret')), expected: { status: 'unconfirmed', reason: 'network-error' } },
+  ])('clears local tokens after $name and preserves the outcome on repeat and restart', async ({ respond, expected }) => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host, active } = await boot(path, undefined)
+    await seedAccount(ctx, accountId, { token: 'synthetic-secret' })
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async url => String(url) === endpoint ? respond() : metadata())
+    vi.stubGlobal('fetch', fetcher)
+    const key = credentialKey('dsh-chatgpt', accountId)
+    const hostIdentity = await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', 'host'))
+
+    await expect(host.signOut(accountId)).resolves.toEqual({
+      revocation: expected, revocationConfirmed: expected.status === 'confirmed',
+    })
+    const saved = await ctx.credentials.readRecord(key)
+    expect(saved).toMatchObject({ payload: {
+      status: 'needs-sign-in', grantGeneration: 1, signOutRevocation: expected,
+      accountId, clientId: `client-${accountId}`, subject: `subject-${accountId}`,
+    } })
+    if (saved?.kind !== 'grant') throw new Error('synthetic sign-out record is missing')
+    for (const field of ['accessToken', 'refreshToken', 'idToken', 'expiresAt', 'scopes']) {
+      expect(saved.payload).not.toHaveProperty(field)
+    }
+    expect(active.get()).toBeUndefined()
+    expect(await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', 'host'))).toEqual(hostIdentity)
+    const calls = fetcher.mock.calls.length
+
+    const restarted = await boot(path, undefined)
+    await expect(restarted.host.signOut(accountId)).resolves.toEqual({
+      revocation: { status: 'not-attempted', reason: 'already-signed-out' }, revocationConfirmed: false,
+    })
+    expect(fetcher).toHaveBeenCalledTimes(calls)
+    expect(await restarted.ctx.credentials.readRecord(key)).toMatchObject({ payload: { grantGeneration: 2, signOutRevocation: expected } })
+    const view = await restarted.host.getState()
+    expect(view.accounts[0]?.signOutRevocation).toEqual(expected)
+    expect(view.accounts[0]?.status).toBe('needs-sign-in')
+    expect(JSON.stringify(view)).not.toContain('synthetic-secret')
+    expect(view.activeAccountId).toBeUndefined()
+  })
+
+  it('clears local tokens when discovery fails without leaking errors', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, undefined)
+    await seedAccount(ctx, accountId, { token: 'synthetic-secret' })
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('synthetic-secret')))
+    await expect(host.signOut(accountId)).resolves.toMatchObject({ revocation: { status: 'unconfirmed', reason: 'metadata-unavailable' } })
+    const saved = await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', accountId))
+    expect(JSON.stringify(saved)).not.toContain('synthetic-secret')
+  })
+
+  it.each(['connected', 'needs-sign-in'] as const)('reports an unattempted revocation for a tokenless $0 record', async status => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, undefined)
+    await seedAccount(ctx, accountId, { token: 'synthetic-secret' })
+    await ctx.credentials.modifyRecord(credentialKey('dsh-chatgpt', accountId), async current => {
+      if (current?.kind !== 'grant') throw new Error('synthetic record is missing')
+      return { kind: 'grant', payload: { ...current.payload, status, refreshToken: '' } }
+    })
+    const fetcher = vi.fn()
+    vi.stubGlobal('fetch', fetcher)
+    const revocation = { status: 'not-attempted', reason: status === 'connected' ? 'no-refresh-token' : 'already-signed-out' }
+    await expect(host.signOut(accountId)).resolves.toEqual({ revocation, revocationConfirmed: false })
+    expect(fetcher).not.toHaveBeenCalled()
+    const saved = await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', accountId))
+    expect(JSON.stringify(saved)).not.toContain('synthetic-secret')
+    expect(saved).toMatchObject({ payload: { signOutRevocation: revocation } })
+  })
+
+  it('clears a prior unconfirmed outcome only after successful reauthorization', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, undefined)
+    await seedAccount(ctx, accountId, { token: 'synthetic-secret' })
+    const nativeFetch = globalThis.fetch
+    vi.stubGlobal('fetch', async (url: RequestInfo | URL) => String(url) === endpoint
+      ? new Response(null, { status: 400 }) : metadata())
+    await host.signOut(accountId)
+    expect((await host.getState()).accounts[0]?.signOutRevocation?.status).toBe('unconfirmed')
+    const ticket = await host.beginLogin(accountId)
+    const authorize = new URL(ticket.authorizationUrl)
+    expect(authorize.searchParams.get('client_id')).toBe(`client-${accountId}`)
+    const { privateKey, publicKey } = await generateKeyPair('ES256')
+    const jwk = await exportJWK(publicKey)
+    const idToken = await new SignJWT({ nonce: authorize.searchParams.get('nonce') })
+      .setProtectedHeader({ alg: 'ES256', kid: 'reconnected-key' })
+      .setIssuer('https://auth.openai.com').setAudience(`client-${accountId}`)
+      .setSubject(`subject-${accountId}`).setIssuedAt().setExpirationTime('5m').sign(privateKey)
+    vi.stubGlobal('fetch', async (url: RequestInfo | URL) => {
+      if (String(url).endsWith('openid-configuration')) return metadata()
+      if (String(url).endsWith('jwks.json')) return new Response(JSON.stringify({ keys: [{ ...jwk, kid: 'reconnected-key', alg: 'ES256', use: 'sig' }] }))
+      if (String(url).endsWith('/oauth/token')) return new Response(JSON.stringify({
+        access_token: 'synthetic-new-access', refresh_token: 'synthetic-new-refresh', id_token: idToken,
+        token_type: 'Bearer', expires_in: 3_600, scope: scopes.join(' '),
+      }))
+      if (String(url) === 'https://api.openai.com/v1/models') return catalogResponse('Astra')
+      throw new Error('unexpected mock endpoint')
+    })
+    const callback = new URL(authorize.searchParams.get('redirect_uri')!)
+    callback.searchParams.set('state', authorize.searchParams.get('state')!)
+    callback.searchParams.set('client_id', `client-${accountId}`)
+    callback.searchParams.set('code', 'synthetic-code')
+    expect((await nativeFetch(callback)).status).toBe(200)
+    await host.waitForLogin(ticket.attemptId)
+    const saved = await ctx.credentials.readRecord(credentialKey('dsh-chatgpt', accountId))
+    expect(saved).toMatchObject({ payload: { status: 'connected', grantGeneration: 1 } })
+    if (saved?.kind !== 'grant') throw new Error('synthetic record is missing')
+    expect(saved.payload).not.toHaveProperty('signOutRevocation')
+    expect((await host.getState()).accounts[0]).not.toHaveProperty('signOutRevocation')
+    await expect(host.prepareCall('gpt-6-astra')).resolves.toBeDefined()
+  })
+
+  it('whitelists persisted revocation metadata before exposing it to the Client', async () => {
+    const path = await home()
+    const accountId = newAccountId()
+    const { ctx, host } = await boot(path, undefined)
+    const expected: ChatGptRevocationResult = { status: 'unconfirmed', reason: 'network-error' }
+    await ctx.credentials.modifyRecord(credentialKey('dsh-chatgpt', accountId), async () => ({
+      kind: 'grant', payload: {
+        version: 1, accountId, clientId: 'test-client', subject: 'test-subject', createdAt: Date.now(), status: 'needs-sign-in',
+        signOutRevocation: { ...expected, error: 'synthetic-secret' },
+      },
+    }))
+    expect((await host.getState()).accounts[0]?.signOutRevocation).toEqual(expected)
+    await ctx.credentials.modifyRecord(credentialKey('dsh-chatgpt', accountId), async current => {
+      if (current?.kind !== 'grant') throw new Error('synthetic record is missing')
+      return { kind: 'grant', payload: { ...current.payload, signOutRevocation: { status: 'unconfirmed', reason: 'synthetic-secret' } } }
+    })
+    const view = await host.getState()
+    expect(view.accounts[0]).not.toHaveProperty('signOutRevocation')
+    expect(JSON.stringify(view)).not.toContain('synthetic-secret')
   })
 })

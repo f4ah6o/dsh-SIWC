@@ -1,6 +1,6 @@
 import { exportJWK, generateKeyPair, SignJWT } from 'jose'
-import { describe, expect, it } from 'vitest'
-import { exchangeAuthorizationCode } from '../src/oauth.js'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { exchangeAuthorizationCode, revokeRefreshToken } from '../src/oauth.js'
 import type { OAuthCompletion } from '../src/oauth.js'
 
 const issuer = 'https://auth.openai.com'
@@ -122,5 +122,75 @@ describe('Sign in with ChatGPT identity verification', () => {
       missingScopes: [],
     })
     expect(JSON.stringify(noRefresh)).not.toContain('access-token')
+  })
+})
+
+describe('renewable-session revocation', () => {
+  afterEach(() => vi.useRealTimers())
+
+  const endpoint = `${issuer}/api/accounts/oauth/revoke`
+  const metadata = () => jsonResponse({
+    issuer, jwks_uri: `${issuer}/.well-known/jwks.json`, revocation_endpoint: endpoint,
+  })
+  const input = { clientId, refreshToken: 'synthetic-refresh-secret', requestTimeoutMs: 1_000 }
+
+  it('confirms HTTP 200, including an already-invalid token, without parsing an empty body', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(metadata()).mockResolvedValueOnce(new Response(null, { status: 200 }))
+    await expect(revokeRefreshToken({ ...input, fetcher })).resolves.toEqual({ status: 'confirmed' })
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    const [url, options] = fetcher.mock.calls[1]!
+    expect(url).toBe(endpoint)
+    expect(options?.method).toBe('POST')
+    expect(options?.redirect).toBe('manual')
+    expect(options?.headers).toEqual({ 'content-type': 'application/x-www-form-urlencoded' })
+    expect(Object.fromEntries(options?.body as URLSearchParams)).toEqual({
+      token: input.refreshToken, client_id: clientId, token_type_hint: 'refresh_token',
+    })
+  })
+
+  it.each([400, 401, 403, 429])('classifies HTTP %s rejection without retrying or exposing the response', async status => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(metadata())
+      .mockResolvedValueOnce(new Response('synthetic-refresh-secret', { status }))
+    await expect(revokeRefreshToken({ ...input, fetcher })).resolves.toEqual({ status: 'unconfirmed', reason: 'request-rejected' })
+    expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+
+  it.each([204, 302])('does not mistake undocumented HTTP %s for confirmation', async status => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(metadata()).mockResolvedValueOnce(new Response(null, { status }))
+    await expect(revokeRefreshToken({ ...input, fetcher })).resolves.toEqual({ status: 'unconfirmed', reason: 'unexpected-response' })
+  })
+
+  it.each([
+    { failure: '5xx', reason: 'service-unavailable', respond: () => Promise.resolve(new Response('synthetic-secret', { status: 503 })) },
+    { failure: 'network error', reason: 'network-error', respond: () => Promise.reject(new Error('synthetic-refresh-secret')) },
+    { failure: 'timeout', reason: 'request-timeout', respond: () => Promise.reject(new DOMException('synthetic-refresh-secret', 'TimeoutError')) },
+    { failure: 'abort', reason: 'request-timeout', respond: () => Promise.reject(new DOMException('synthetic-refresh-secret', 'AbortError')) },
+  ])('bounds the retry after $failure and returns only a safe reason', async ({ respond, reason }) => {
+    vi.useFakeTimers()
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async url => String(url).endsWith('openid-configuration') ? metadata() : respond())
+    const pending = revokeRefreshToken({ ...input, fetcher })
+    await vi.runAllTimersAsync()
+    await expect(pending).resolves.toEqual({ status: 'unconfirmed', reason })
+    expect(fetcher).toHaveBeenCalledTimes(3)
+  })
+
+  it('confirms a successful bounded retry after a temporary failure', async () => {
+    vi.useFakeTimers()
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(metadata())
+      .mockResolvedValueOnce(new Response(null, { status: 500 })).mockResolvedValueOnce(new Response(null, { status: 200 }))
+    const pending = revokeRefreshToken({ ...input, fetcher })
+    await vi.runAllTimersAsync()
+    await expect(pending).resolves.toEqual({ status: 'confirmed' })
+    expect(fetcher).toHaveBeenCalledTimes(3)
+  })
+
+  it.each([
+    { failure: 'unavailable discovery', discovery: () => Promise.reject(new Error('synthetic-refresh-secret')) },
+    { failure: 'untrusted endpoint', discovery: () => Promise.resolve(jsonResponse({ issuer, jwks_uri: `${issuer}/jwks`, revocation_endpoint: 'https://attacker.example/revoke' })) },
+    { failure: 'invalid discovery', discovery: () => Promise.resolve(jsonResponse({ error: 'synthetic-refresh-secret' })) },
+  ])('handles $failure without sending a token to an unverified endpoint', async ({ discovery }) => {
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(discovery)
+    await expect(revokeRefreshToken({ ...input, fetcher })).resolves.toEqual({ status: 'unconfirmed', reason: 'metadata-unavailable' })
+    expect(fetcher).toHaveBeenCalledTimes(1)
   })
 })

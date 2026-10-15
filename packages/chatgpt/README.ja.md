@@ -98,6 +98,10 @@ dsh --profile headless --patch /tmp/chatgpt-login.patch.yml "ChatGPT を使う�
 
 アカウント登録と Host ID は `$DSH_HOME/.credentials.yaml` に保存されます。同じ `$DSH_HOME` を使う profile はこれらを共有します。一つの profile でサインアウトすると、共有するすべての profile の保存トークンが消去されます。サインアウトはトークン失効を要求してから access、refresh、ID token を削除します。再起動後に同じ登録を Authorization flow で再接続できるよう、client ID と subject は `needs-sign-in` として残します。Client と Session log にトークン値は渡りません。
 
+ローカルのサインアウト、更新可能なセッションの失効、ChatGPT 側のアプリ登録の削除は別の操作です。Host は失効結果を `confirmed`、秘密情報を含まない固定理由付きの `unconfirmed`、`not-attempted` に区別します。HTTP 200 はすでに無効なトークンを含めて失効確認を意味し、ネットワーク障害や 5xx ではトークンがメモリーにある間だけ一度再試行します。確認の成否にかかわらずローカルトークンを削除し、後日の再試行用に秘密を残しません。最後のサインアウト結果だけを安全なメタデータとして残すため、再サインアウトや再起動で以前の未確認状態が成功に変わることはありません。再認証が成功すると以前の結果を消去します。
+
+失効は登録済みクライアントを削除しないため、サインアウト後も ChatGPT の接続一覧にアプリが残ることがあります。接続を解除するには、ChatGPT の設定で「Security and login」→「Login connections」→「Sign in with ChatGPT」からこのアプリを選び、「Manage connection」→「Disconnect」を実行し、もう一度「Disconnect」を選んで確認してください。ChatGPT プランを使わないサインイン専用の接続では「Manage connection」や「Disconnect」が表示されない場合があります。その場合はアプリ内でサインアウトしてローカルセッションを終了してください。サインアウトと ChatGPT 側の接続解除は別の操作です。OpenAI の[アカウントとセッションの仕様](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)と[SIWC 接続解除の公式手順](https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites)を参照してください。設定画面のリンクもこの公式手順を開きます。このプラグインはアプリ登録削除 API を呼び出しません。
+
 ### モデルと能力を選ぶ
 
 設定画面は OpenAI が `visibility: "list"` とした全モデルを、正確な `slug` と `display_name` で表示します。推論用として公開するのは context window が既知のモデルだけです。初期メタデータは [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol)、[GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna)、[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra)、[GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol)、[GPT-5.6 Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol)、[GPT-5.6 Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra)、[GPT-5.6 Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna) の7つです。各ページには現時点で context 1,050,000 token、最大出力 128,000 token、text/image 入力、text 出力と記載されています。最大出力値はメタデータに限り、リクエストの出力上限には設定しません。
