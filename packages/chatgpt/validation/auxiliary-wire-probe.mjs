@@ -11,7 +11,7 @@ const consumerDir = resolve(process.env.DSH_CONSUMER_DIR ?? process.cwd())
 const consumerRequire = createRequire(resolve(consumerDir, 'package.json'))
 const consumerManifestPath = consumerRequire.resolve('@deepseek-ai/dsh/package.json')
 const consumerManifest = JSON.parse(await readFile(consumerManifestPath, 'utf8'))
-const supportedDshVersions = ['0.2.0-rc.2', '0.2.1-alpha.1']
+const supportedDshVersions = ['0.2.0-rc.2', '0.2.1-alpha.1', '0.2.1-alpha.2', '0.2.1-alpha.3', '0.2.1-alpha.4']
 assert.ok(supportedDshVersions.includes(consumerManifest.version), `Unsupported DSH consumer version: ${consumerManifest.version}`)
 
 const pluginDir = process.env.DSH_PLUGIN_DIR ? resolve(process.env.DSH_PLUGIN_DIR) : consumerDir
@@ -228,7 +228,7 @@ const credentialPath = join(scratchHome, '.credentials.yaml')
 let ctx
 let fibers = []
 try {
-  const [{ Context }, { TypertRegistry }, { SessionProjectionRegistry }, { SessionStore, Session }, { TokenMeter }, { LlmRuntime, createUserMessage }, { LocalCredentialProvider }, { AuthorizationService }, { generateSessionTitleWithLlm, resolveSessionTitleLlmConfig }, { BasicCompactionEngine }, chatgpt] = await Promise.all([
+  const [{ Context }, { TypertRegistry }, { SessionProjectionRegistry }, { SessionStore, Session }, { TokenMeter }, { LlmRuntime, createUserMessage }, { LocalCredentialProvider }, { AuthorizationService }, { generateSessionTitleWithLlm, executeSessionTitleLlm, resolveSessionTitleLlmConfig }, { BasicCompactionEngine }, chatgpt] = await Promise.all([
     importConsumerPackage('@deepseek-ai/cordis'),
     importConsumerPackage('@deepseek-ai/dsh-typert-registry'),
     importConsumerPackage('@deepseek-ai/dsh-session-projection'),
@@ -289,15 +289,26 @@ try {
     messages: [{ seq: titleSeq, text: 'Please summarize this scratch-only conversation.' }],
     signal: new AbortController().signal,
   }
-  const title = await generateSessionTitleWithLlm(ctx, resolveSessionTitleLlmConfig({
-    targetWords: 6,
-    targetCjkCharacters: 12,
+  const titleControls = {
     maxInputBytes: 4096,
     maxOutputTokens: 64,
     timeoutMs: 10_000,
     provider: 'chatgpt',
     model: 'gpt-6-luna',
-  }), titleRequest, titleRequest.messages, 'scratch-title-provider')
+  }
+  // Newer DSH releases separate title wording from the shared execution policy.
+  const title = executeSessionTitleLlm
+    ? await executeSessionTitleLlm(ctx, resolveSessionTitleLlmConfig(titleControls), titleRequest, 'scratch-title-provider', {
+      system: 'Write a short title for this conversation.',
+      input: titleRequest.messages.map(message => message.text).join('\n'),
+      messageSeqs: [titleSeq],
+      selectReasoningEffort: () => undefined,
+    }).then(response => ({ title: response.blocks.filter(block => block.type === 'text').map(block => block.text).join('') }))
+    : await generateSessionTitleWithLlm(ctx, resolveSessionTitleLlmConfig({
+      ...titleControls,
+      targetWords: 6,
+      targetCjkCharacters: 12,
+    }), titleRequest, titleRequest.messages, 'scratch-title-provider')
   assert.equal(title.title, 'Scratch title')
   const titleWire = responseRequests.at(-1)?.body
   assert.equal(titleWire.model, 'gpt-6-luna')

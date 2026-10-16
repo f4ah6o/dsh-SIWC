@@ -26,12 +26,12 @@ Add ChatGPT subscription models to a DeepSeek Harness profile without a separate
 
 ### Install from npm
 
-After npm publishes prerelease version `0.1.0-alpha.3`, add the bundle to every profile that will use ChatGPT:
+After npm publishes prerelease version `0.1.0-alpha.4`, add the bundle to every profile that will use ChatGPT:
 
 ```sh
-dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.3
-dsh plugin --profile headless add @f12o/dsh-siwc@0.1.0-alpha.3
-dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0-alpha.3
+dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.4
+dsh plugin --profile headless add @f12o/dsh-siwc@0.1.0-alpha.4
+dsh plugin --profile desktop add @f12o/dsh-siwc@0.1.0-alpha.4
 ```
 
 For Desktop CLI installs, launch the application once to create its profile, then fully quit it before running package commands. Use that release's bundled `dsh` CLI, not a different `dsh` on `PATH`. The current fork places its CLI at `resources/runtime/cli/bin/dsh` (`dsh.cmd` on Windows); confirm the path for your installed release. You can also use Desktop's Plugin Manager after profile setup. Reopen Desktop after CLI package operations.
@@ -40,7 +40,7 @@ If a profile already has the former `@f4ah6o/dsh-chatgpt` package, remove it fro
 
 ```sh
 dsh plugin --profile <profile> remove @f4ah6o/dsh-chatgpt
-dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0-alpha.3
+dsh plugin --profile <profile> add @f12o/dsh-siwc@0.1.0-alpha.4
 ```
 
 The former and current package names use the same provider identity, Remote namespace, and credential IDs. Keep the same `$DSH_HOME` to preserve the credential store; a valid saved grant remains usable without signing in again, while an expired or revoked grant may require sign-in. For Desktop, use its bundled CLI with Desktop closed for both commands.
@@ -51,12 +51,12 @@ To install from a checkout, pack the standalone plugin and add its tarball to a 
 
 ```sh
 pnpm --dir packages/chatgpt pack
-dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
-dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
-dsh plugin --profile desktop add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.3.tgz
+dsh plugin --profile web add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.4.tgz
+dsh plugin --profile headless add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.4.tgz
+dsh plugin --profile desktop add /path/to/deepseek-harness-plugin/packages/chatgpt/f12o-dsh-siwc-0.1.0-alpha.4.tgz
 ```
 
-The bundle inserts the ChatGPT plugin row; remove it with `dsh plugin --profile <profile> remove @f12o/dsh-siwc`. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1` through `0.2.1-alpha.3`; other DSH API versions are not covered.
+The bundle inserts the ChatGPT plugin row; remove it with `dsh plugin --profile <profile> remove @f12o/dsh-siwc`. Its Host APIs were tested with DSH `0.2.0-rc.2` and `0.2.1-alpha.1` through `0.2.1-alpha.4`; other DSH API versions are not covered.
 
 The Host needs DSH Credentials, Authorization, and LLM services. The shipped `web`, `desktop`, `headless`, and `sdk` profiles include them through `dsh-base`. The bundle also inserts a startup check. When the DSH launcher signals readiness, the check reports missing services for an enabled ChatGPT Host row and aborts startup; it skips a disabled or deleted Host row. The standalone `sdk-minimal` profile omits Credentials and Authorization. Add matching provider packages to that profile, then add their rows to its `cordis.patch.yml`:
 
@@ -64,7 +64,7 @@ The Host needs DSH Credentials, Authorization, and LLM services. The shipped `we
 pnpm --dir "${DSH_HOME:-$HOME/.dsh}/profiles/sdk-minimal" add @deepseek-ai/dsh-authorization@0.2.0-rc.2 @deepseek-ai/dsh-credentials-local@0.2.0-rc.2
 ```
 
-Match both packages to the DSH installation (for example `0.2.1-alpha.3` on DSH `0.2.1-alpha.3`); do not mix DSH API lines. Add these rows after installing the ChatGPT bundle:
+Match both packages to the DSH installation (for example `0.2.1-alpha.4` on DSH `0.2.1-alpha.4`); do not mix DSH API lines. Add these rows after installing the ChatGPT bundle:
 
 ```yaml
 - insert:
