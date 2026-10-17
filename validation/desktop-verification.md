@@ -1,21 +1,21 @@
 # Installed Desktop verification
 
-Desktop acceptance is incomplete. A Windows attempt with official DSH `0.2.0-rc.2` added the then-current plugin artifact, then hit a TypeError at `dsh-desktop-host/lib/index.js:337:29`: `ctx.connection` was missing when Desktop read `authenticatedUrl`. The underlying composition cause is unresolved, and the artifact source was not recorded. The v5 and prepublication `0.1.0` compatibility matrices used the official and fork CLIs but did not install or launch the plugin in Desktop. The planned npm alpha has not been published or tested in Desktop. Run this checklist on a supported macOS or Windows release target; Linux is not a supported Desktop release target.
+Desktop acceptance is incomplete. A Windows attempt with official DSH `0.2.0-rc.2` added the then-current plugin artifact, then hit a TypeError at `dsh-desktop-host/lib/index.js:337:29`: `ctx.connection` was missing when Desktop read `authenticatedUrl`. The underlying composition cause is unresolved, and the artifact source was not recorded. The v5 and prepublication `0.1.0` compatibility matrices used the official and fork CLIs but did not install or launch the plugin in Desktop. The current `0.1.0-alpha.5` candidate has not been published or tested in Desktop. Run this checklist on a supported macOS or Windows release target; Linux is not a supported Desktop release target.
 
 ## Record the target
 
-Use a separate empty Harness home for each target row. Never use a home that contains a real ChatGPT grant. The target is the planned alpha release `@f12o/dsh-siwc@0.1.0-alpha.1` with npm dist-tag `alpha`; publication is pending. Its workspace tarball is [`dist/f12o-dsh-siwc-0.1.0-alpha.1.tgz`](../dist/f12o-dsh-siwc-0.1.0-alpha.1.tgz), SHA-256 `3c5f83e28a590c804245d05791b5cbead7fbbcc400649ed861bf775c02524a02`. The preserved v5 tarball belongs to the former package identity and is historical evidence only:
+Use a separate empty Harness home for each target row. Never use a home that contains a real ChatGPT grant. The target is the planned alpha release `@f12o/dsh-siwc@0.1.0-alpha.5` with npm dist-tag `alpha`; publication is pending. Its workspace tarball is [`dist/f12o-dsh-siwc-0.1.0-alpha.5.tgz`](../dist/f12o-dsh-siwc-0.1.0-alpha.5.tgz), SHA-256 `7425bc6ed094e2c9e560b9d9700bb204271f7e37fd2a126bfa9c2df08ea10039`. The preserved v5 tarball belongs to the former package identity and is historical evidence only:
 
 | Field | Value |
 |---|---|
-| Planned npm package | `@f12o/dsh-siwc@0.1.0-alpha.1`, dist-tag `alpha` (not yet published) |
-| Install spec after publication | `@f12o/dsh-siwc@0.1.0-alpha.1` |
+| Planned npm package | `@f12o/dsh-siwc@0.1.0-alpha.5`, dist-tag `alpha` (not yet published) |
+| Install spec after publication | `@f12o/dsh-siwc@0.1.0-alpha.5` |
 | Prior prepublication candidate tarball | `dist/f12o-dsh-siwc-0.1.0.tgz`; historical preparation artifact only |
 | Prior candidate SHA-256 | `15c16502dc658f752c5551b116d98dae286f32c69de3cc9e4d54a279ef1c4110` |
-| Alpha tarball | Packed; official and fork CLI/SDK/Web smoke passed; Desktop validation pending |
+| Alpha tarball | Packed; build, typecheck, 75 tests, wire probe, and current-DSH Web smoke passed; Desktop validation pending |
 | Historical v5 package | `@f4ah6o/dsh-chatgpt@0.1.0`; ignored, untracked workspace tarball at `dist/f4ah6o-dsh-chatgpt-0.1.0.tgz` |
 | Historical v5 SHA-256 | `66ed59d58fe7d241d2cfcfc777939a7a3d7d49710cdce4cbecc9dcee8ffeeb2d` |
-| Host | Official DSH `0.2.0-rc.2`, official DSH `0.2.1-alpha.1`, or the fork; record the exact version/commit |
+| Host | DSH `0.2.1-rc.2` or the current fork; record the exact version/commit |
 | Desktop version and OS/architecture | Record the installed release and supported target |
 | Harness home | Record the fresh test-home path, without account data |
 | Result | Pending |
@@ -59,7 +59,7 @@ Repeat the procedure for each Host variant being qualified. The existing artifac
    ```sh
    DSH_HOME="$HOME/dsh-chatgpt-desktop-check/<target>" \
      "<bundled dsh CLI path documented for this release>" \
-     plugin --profile desktop add '@f12o/dsh-siwc@0.1.0-alpha.1'
+     plugin --profile desktop add '@f12o/dsh-siwc@0.1.0-alpha.5'
    ```
 
    Windows PowerShell:
@@ -67,10 +67,10 @@ Repeat the procedure for each Host variant being qualified. The existing artifac
    ```powershell
    $env:DSH_HOME = "$env:LOCALAPPDATA\dsh-chatgpt-desktop-check\<target>"
    & "<bundled dsh CLI path documented for this release>" `
-     plugin --profile desktop add '@f12o/dsh-siwc@0.1.0-alpha.1'
+     plugin --profile desktop add '@f12o/dsh-siwc@0.1.0-alpha.5'
    ```
 
-   The alpha package is not published yet; do not treat this step as validated until that exact release is available and installed. Confirm the bundled CLI location in the documentation for the exact Desktop release; packaging paths may differ by release. Alternatively, use Desktop's Plugin Manager after its profile has been initialized. The current fork's Desktop guide documents `resources/runtime/cli/bin/dsh` (`dsh.cmd` on Windows), but that path has not been confirmed for both official versions in this matrix. Desktop uses its bundled runtime and pnpm for CLI plugin management; no system Node.js, pnpm, or local tarball transfer is required after publication. Do not run `dsh --profile desktop`, `--dump-config`, raw SDK arguments, custom package binaries, or platform-guard bypasses.
+   The alpha.5 package is not published yet; do not treat this step as validated until that exact release is available and installed. Confirm the bundled CLI location in the documentation for the exact Desktop release; packaging paths may differ by release. Alternatively, use Desktop's Plugin Manager after its profile has been initialized. The current fork's Desktop guide documents `resources/runtime/cli/bin/dsh` (`dsh.cmd` on Windows), but that path has not been confirmed for both official versions in this matrix. Desktop uses its bundled runtime and pnpm for CLI plugin management; no system Node.js, pnpm, or local tarball transfer is required after publication. Do not run `dsh --profile desktop`, `--dump-config`, raw SDK arguments, custom package binaries, or platform-guard bypasses.
 
 6. Relaunch the same installed application from the same shell with the same `DSH_HOME`. Verify that the ChatGPT Settings section is present, Host startup completes, and the fresh account list is empty. Fully quit and relaunch once more to verify the installed plugin remains available after restart.
 
@@ -81,6 +81,6 @@ Repeat the procedure for each Host variant being qualified. The existing artifac
 | Host variant | Desktop version | OS/architecture | Install method | Startup, empty-state, restart, and clean-quit result |
 |---|---|---|---|---|
 | Official DSH `0.2.0-rc.2`, prior artifact attempt | `0.2.0-rc.2` (confirm installed version) | Windows (architecture pending) | Then-current plugin artifact; source not recorded | TypeError after plugin add at `dsh-desktop-host/lib/index.js:337:29`: missing `ctx.connection` while reading `authenticatedUrl`; cause unresolved |
-| Official DSH `0.2.0-rc.2`, planned alpha release | `0.2.0-rc.2` (target; confirm installed version) | Windows (architecture pending) | `@f12o/dsh-siwc@0.1.0-alpha.1` after publication | Pending; alpha is not published or tested in Desktop |
-| Official DSH `0.2.1-alpha.1` | Pending | Pending | Pending | Pending |
+| DSH `0.2.1-rc.2` (current checkout), planned alpha release | `0.2.1-rc.2` (target; confirm installed version) | Pending | `@f12o/dsh-siwc@0.1.0-alpha.5` after publication | Pending; alpha.5 is not published or tested in Desktop |
+| Historical DSH `0.2.1-alpha.1` | Pending | Pending | Pending | Pending |
 | `f4ah6o/deepseek-harness` fork | Pending | Pending | Pending | Pending |

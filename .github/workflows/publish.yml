@@ -7,7 +7,7 @@ on:
         description: Exact version from packages/chatgpt/package.json
         required: true
         type: string
-        default: '0.1.0-alpha.4'
+        default: '0.1.0-alpha.5'
       dist_tag:
         description: npm dist-tag for this prerelease
         required: true

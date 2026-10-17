@@ -11,7 +11,7 @@ const consumerDir = resolve(process.env.DSH_CONSUMER_DIR ?? process.cwd())
 const consumerRequire = createRequire(resolve(consumerDir, 'package.json'))
 const consumerManifestPath = consumerRequire.resolve('@deepseek-ai/dsh/package.json')
 const consumerManifest = JSON.parse(await readFile(consumerManifestPath, 'utf8'))
-const supportedDshVersions = ['0.2.0-rc.2', '0.2.1-alpha.1', '0.2.1-alpha.2', '0.2.1-alpha.3', '0.2.1-alpha.4']
+const supportedDshVersions = ['0.2.0-rc.2', '0.2.1-alpha.1', '0.2.1-alpha.2', '0.2.1-alpha.3', '0.2.1-alpha.4', '0.2.1-rc.2']
 assert.ok(supportedDshVersions.includes(consumerManifest.version), `Unsupported DSH consumer version: ${consumerManifest.version}`)
 
 const pluginDir = process.env.DSH_PLUGIN_DIR ? resolve(process.env.DSH_PLUGIN_DIR) : consumerDir

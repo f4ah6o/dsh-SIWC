@@ -1,6 +1,25 @@
 # Fork verification report
 
-This report separates completed evidence from checks still in progress. The current integration checkout is `253ddfe6b454`; the product build completed at `f9509d70dd`, and changes after that build are test or fixture changes only. Coverage evidence is from the earlier full-suite checkpoint `5c9f0bdfdb`. These results therefore identify their tested checkpoints rather than implying that every gate ran on one commit.
+## Current DSH 0.2.1-rc.2 compatibility (2026-10-17)
+
+The plugin source now targets DSH `0.2.1-rc.2` (the current checkout is `527a1000cf` on the `shiguredo` branch, whose running UI reports `0.2.1-rc.2-527a100-dirty`). The package version is `0.1.0-alpha.5`; npm still has `0.1.0-alpha.4` published, so the new version is a source candidate awaiting publication.
+
+| Check | Result and evidence |
+|---|---|
+| Dependency update | PASS: DSH packages moved from `0.2.1-alpha.4` to `0.2.1-rc.2`; Cordis `4.0.5`, loader `1.0.6`, include `1.0.10`, group `1.0.5`, and schemastery `3.18.5` are the stable versions used by the current runtime. |
+| Typert generator patch | PASS: the patch is now `patches/@deepseek-ai__dsh-typert-generator@0.2.1-rc.2.patch`; it applies to the published generator and the fixed code is present in the installed package. |
+| Install | PASS: `pnpm install --no-frozen-lockfile` resolved 312 entries and installed 244 packages; the lockfile contains no `0.2.1-alpha.4` references. |
+| Build and typecheck | PASS: `pnpm run build` built Host `lib/index.js`/`lib/preflight.js` and Client `lib/client.js`; `pnpm run typecheck` passed for both projects. |
+| Tests | PASS: `pnpm test` ran 10 files and 75 tests, all passing. |
+| Auxiliary wire probe | PASS: `@f12o/dsh-siwc@0.1.0-alpha.5` against a separate published `0.2.1-rc.2` consumer with Cordis `4.0.5`; title, compaction, usage, pre-HTTP cap rejection, and tool-call cases passed. Log: `/tmp/siwc-aux-probe-rc2-final.log`. |
+| Fresh Web install | PASS: the final packed tarball installed into a fresh `/tmp/siwc-rc2-home2` Web profile through the current `apps/cli/lib/bin.js`; the composed config contained the `chatgpt` and `chatgpt-preflight` rows. |
+| Browser smoke | PASS: Chromium loaded the current Web UI and the served plugin `client.js`; **Settings → ChatGPT** rendered the empty-account state with no page errors. Screenshot: [siwc-rc2-chatgpt-settings.png](siwc-rc2-chatgpt-settings.png). |
+
+This run did not exercise live ChatGPT inference, a connected account, headless/SDK profiles, or a packaged Desktop release. Desktop acceptance remains pending as described below.
+
+## Historical integration snapshot
+
+This report separates completed evidence from checks still in progress. The historical integration checkout is `253ddfe6b454`; the product build completed at `f9509d70dd`, and changes after that build are test or fixture changes only. Coverage evidence is from the earlier full-suite checkpoint `5c9f0bdfdb`. These results therefore identify their tested checkpoints rather than implying that every gate ran on one commit.
 
 ## Completed harness checks
 
