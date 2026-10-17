@@ -26,7 +26,7 @@ Add ChatGPT subscription models to a DeepSeek Harness profile without a separate
 
 ### Install from npm
 
-After npm publishes prerelease version `0.1.0-alpha.5`, add the bundle to every profile that will use ChatGPT:
+Install the published prerelease version `0.1.0-alpha.5` into every profile that will use ChatGPT:
 
 ```sh
 dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.5

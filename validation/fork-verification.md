@@ -2,7 +2,7 @@
 
 ## Current DSH 0.2.1-rc.2 compatibility (2026-10-17)
 
-The plugin source now targets DSH `0.2.1-rc.2` (the current checkout is `527a1000cf` on the `shiguredo` branch, whose running UI reports `0.2.1-rc.2-527a100-dirty`). The package version is `0.1.0-alpha.5`; npm still has `0.1.0-alpha.4` published, so the new version is a source candidate awaiting publication.
+The plugin source now targets DSH `0.2.1-rc.2` (the current checkout is `527a1000cf` on the `shiguredo` branch, whose running UI reports `0.2.1-rc.2-527a100-dirty`). The package version is `0.1.0-alpha.5`, published on npm with the `alpha` dist-tag on 2026-10-17 by [workflow run 39027790810](https://github.com/f4ah6o/dsh-SIWC/actions/runs/39027790810) with provenance.
 
 | Check | Result and evidence |
 |---|---|
@@ -11,9 +11,10 @@ The plugin source now targets DSH `0.2.1-rc.2` (the current checkout is `527a100
 | Install | PASS: `pnpm install --no-frozen-lockfile` resolved 312 entries and installed 244 packages; the lockfile contains no `0.2.1-alpha.4` references. |
 | Build and typecheck | PASS: `pnpm run build` built Host `lib/index.js`/`lib/preflight.js` and Client `lib/client.js`; `pnpm run typecheck` passed for both projects. |
 | Tests | PASS: `pnpm test` ran 10 files and 75 tests, all passing. |
-| Auxiliary wire probe | PASS: `@f12o/dsh-siwc@0.1.0-alpha.5` against a separate published `0.2.1-rc.2` consumer with Cordis `4.0.5`; title, compaction, usage, pre-HTTP cap rejection, and tool-call cases passed. Log: `/tmp/siwc-aux-probe-rc2-final.log`. |
-| Fresh Web install | PASS: the final packed tarball installed into a fresh `/tmp/siwc-rc2-home2` Web profile through the current `apps/cli/lib/bin.js`; the composed config contained the `chatgpt` and `chatgpt-preflight` rows. |
-| Browser smoke | PASS: Chromium loaded the current Web UI and the served plugin `client.js`; **Settings → ChatGPT** rendered the empty-account state with no page errors. Screenshot: [siwc-rc2-chatgpt-settings.png](siwc-rc2-chatgpt-settings.png). |
+| Auxiliary wire probe | PASS: both the local candidate and the registry artifact of `@f12o/dsh-siwc@0.1.0-alpha.5` passed against a separate published `0.2.1-rc.2` consumer with Cordis `4.0.5`; title, compaction, usage, pre-HTTP cap rejection, and tool-call cases passed. Logs: `/tmp/siwc-aux-probe-rc2-final.log`, `/tmp/siwc-aux-probe-published.log`. |
+| Fresh Web install | PASS: the local packed tarball installed into `/tmp/siwc-rc2-home2`, and the registry spec `@f12o/dsh-siwc@0.1.0-alpha.5` installed into `/tmp/siwc-published-home`, both as fresh Web profiles through the current `apps/cli/lib/bin.js`; each composed config contained the `chatgpt` and `chatgpt-preflight` rows. |
+| Browser smoke | PASS: Chromium loaded the current Web UI and the served plugin `client.js` from both installs; **Settings → ChatGPT** rendered the empty-account state with no page errors. Screenshot: [siwc-rc2-chatgpt-settings.png](siwc-rc2-chatgpt-settings.png). |
+| npm publication | PASS: `alpha` dist-tag now points to `0.1.0-alpha.5`; registry SHA-256 `9ca8b408d0336423aa02f25a1bdf8df39e67678d6b0dbc7bc153d2152dba3c55`, SHA-1 `f16d3aa8adae1e67183fbbb26d0a4f99b5fce1e2`, provenance attestation recorded. |
 
 This run did not exercise live ChatGPT inference, a connected account, headless/SDK profiles, or a packaged Desktop release. Desktop acceptance remains pending as described below.
 

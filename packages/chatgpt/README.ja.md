@@ -26,7 +26,7 @@ kind: "package-bundle"
 
 ### npm からインストール
 
-npm で prerelease `0.1.0-alpha.5` が公開された後、ChatGPT を使う各 profile に bundle を追加します。
+公開済みの prerelease `0.1.0-alpha.5` を、ChatGPT を使う各 profile に追加します。
 
 ```sh
 dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.5
