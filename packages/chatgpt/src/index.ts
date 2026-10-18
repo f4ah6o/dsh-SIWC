@@ -69,9 +69,9 @@ export class ChatGptController extends TypertRemoteService {
     return this.host.setActiveAccount(request.accountId)
   }
 
-  /** Remove an account and revoke its refresh token when possible.
+  /** Clear shared local tokens and attempt renewable-session revocation, retaining registration.
    * @param request - account to disconnect.
-   * @returns whether OpenAI confirmed token revocation.
+   * @returns the safe revocation outcome after local token removal.
    */
   @Remote
   signOut(request: ChatGptAccountRequest): Promise<ChatGptSignOutResult> {

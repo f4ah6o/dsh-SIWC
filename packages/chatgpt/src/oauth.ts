@@ -1,6 +1,7 @@
 /** Sign in with ChatGPT OAuth and OpenID Connect protocol operations. */
 import { createHash, randomBytes } from 'node:crypto'
 import { customFetch, createRemoteJWKSet, jwtVerify } from 'jose'
+import type { ChatGptRevocationResult } from './types.js'
 
 const AUTH_ORIGIN = 'https://auth.openai.com'
 const AUTHORIZE_URL = `${AUTH_ORIGIN}/api/accounts/authorize`
@@ -207,34 +208,43 @@ export async function revokeRefreshToken(input: {
   readonly refreshToken: string
   readonly requestTimeoutMs: number
   readonly fetcher?: OAuthFetch
-}): Promise<boolean> {
+}): Promise<ChatGptRevocationResult> {
   const fetcher = input.fetcher ?? fetch
+  let discovery: OpenIdConfiguration
   try {
-    const discovery = await openIdConfiguration(fetcher, input.requestTimeoutMs)
-    const body = new URLSearchParams({
-      token: input.refreshToken,
-      token_type_hint: 'refresh_token',
-      client_id: input.clientId,
-    })
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const response = await fetcher(discovery.revocation_endpoint, {
-          method: 'POST',
-          headers: { 'content-type': 'application/x-www-form-urlencoded' },
-          body,
-          signal: AbortSignal.timeout(input.requestTimeoutMs),
-        })
-        if (response.ok) return true
-        if (response.status < 500 || attempt === 1) return false
-      } catch (error) {
-        if (attempt === 1 || isAbortError(error)) return false
-      }
-      await new Promise(resolve => setTimeout(resolve, 500))
-    }
+    discovery = await openIdConfiguration(fetcher, input.requestTimeoutMs)
   } catch {
-    return false
+    return { status: 'unconfirmed', reason: 'metadata-unavailable' }
   }
-  return false
+  const body = new URLSearchParams({
+    token: input.refreshToken,
+    token_type_hint: 'refresh_token',
+    client_id: input.clientId,
+  })
+  let reason: Extract<ChatGptRevocationResult, { status: 'unconfirmed' }>['reason'] = 'network-error'
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await fetcher(discovery.revocation_endpoint, {
+        method: 'POST',
+        redirect: 'manual',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body,
+        signal: AbortSignal.timeout(input.requestTimeoutMs),
+      })
+      // The SIWC contract confirms revocation with HTTP 200, even for an invalid token.
+      if (response.status === 200) return { status: 'confirmed' }
+      if (response.status >= 400 && response.status < 500) {
+        return { status: 'unconfirmed', reason: 'request-rejected' }
+      }
+      if (response.status < 500) return { status: 'unconfirmed', reason: 'unexpected-response' }
+      reason = 'service-unavailable'
+    } catch (error: unknown) {
+      reason = error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError')
+        ? 'request-timeout' : 'network-error'
+    }
+    if (attempt === 0) await new Promise(resolve => setTimeout(resolve, 500))
+  }
+  return { status: 'unconfirmed', reason }
 }
 
 interface IdentityClaims {
@@ -386,8 +396,4 @@ function oauthResponseError(status: number, body: Record<string, unknown>, fallb
 function requestSignal(requestTimeoutMs: number, signal?: AbortSignal): AbortSignal {
   const timeout = AbortSignal.timeout(requestTimeoutMs)
   return signal === undefined ? timeout : AbortSignal.any([signal, timeout])
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === 'AbortError'
 }

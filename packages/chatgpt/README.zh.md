@@ -98,6 +98,10 @@ dsh --profile headless --patch /tmp/chatgpt-login.patch.yml "运行一个使用 
 
 账号记录和稳定 Host ID 保存在 `$DSH_HOME/.credentials.yaml`。使用同一 `$DSH_HOME` 的 profile 共享这些记录，因此在任一 profile 登出都会清除所有这些 profile 的本地 token。登出会请求撤销 token，然后删除本地 access、refresh 和 ID token；它保留已签发的 client ID 和已验证 subject，并标记为 `needs-sign-in`，以便重启后通过公开 Authorization flow 重新连接。Client 和 Session log 不会收到 token 值。
 
+本地退出登录、撤销可续期会话和删除 ChatGPT 中的应用注册是不同的操作。Host 将撤销结果区分为 `confirmed`、带不含凭据的固定原因的 `unconfirmed` 和 `not-attempted`。HTTP 200 表示已确认撤销，包括已失效的令牌；网络故障或 5xx 响应会在令牌仍在内存中时重试一次。无论是否确认，本地令牌都会删除，也不会为日后重试保留秘密。最后一次退出登录的结果仅作为安全元数据保存，因此再次退出或重启不会把先前未确认的结果变成成功。重新登录成功后会清除旧结果。
+
+撤销不会删除已注册的客户端，因此退出后应用仍可能出现在 ChatGPT 的连接列表中。要断开连接，请在 ChatGPT 设置中打开「Security and login」→「Login connections」→「Sign in with ChatGPT」，选择此应用，再选择「Manage connection」→「Disconnect」，并再次选择「Disconnect」确认。不使用 ChatGPT 订阅的仅登录连接可能不显示「Manage connection」或「Disconnect」；此时请在应用内退出登录以结束本地会话。退出登录与在 ChatGPT 中断开连接是不同的操作。参阅 OpenAI 的[账号与会话规范](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)和[SIWC 断开连接官方步骤](https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites)。设置界面的链接也会打开这些官方步骤。本插件不会调用应用注册删除 API。
+
 ### 选择模型和能力
 
 设置页面展示 OpenAI 标记为 `visibility: "list"` 的所有目录模型，并保留精确的 `slug` 和 `display_name`。Provider 只会公布已知 context window 的模型。初始元数据覆盖官方文档中的七个精确 slug：[GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol)、[GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna)、[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra)、[GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol)、[GPT-5.6 Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol)、[GPT-5.6 Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra)、[GPT-5.6 Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna)。每个页面目前都列出 1,050,000 token context、128,000 token 最大输出、text/image 输入和 text 输出。最大输出仅作为目录元数据；adapter 不会将其作为输出上限发送。
