@@ -26,7 +26,7 @@ Add ChatGPT subscription models to a DeepSeek Harness profile without a separate
 
 ### Install from npm
 
-Install the prerelease version `0.1.0-alpha.6` into every profile that will use ChatGPT (not yet published; use [Install a local Pack](#install-a-local-pack) until it is):
+Install the published prerelease version `0.1.0-alpha.6` into every profile that will use ChatGPT:
 
 ```sh
 dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.6

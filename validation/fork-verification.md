@@ -2,7 +2,7 @@
 
 ## Current DSH 0.2.2-rc.2 compatibility (2026-11-13)
 
-The plugin source now targets DSH `0.2.2-rc.2` (the local checkout reports `0.2.2-rc.2`, commit `5ab222a958`). The package version is prepared as `0.1.0-alpha.6` but has not been published to npm; `0.1.0-alpha.5` remains the latest published prerelease.
+The plugin source now targets DSH `0.2.2-rc.2` (the local checkout reports `0.2.2-rc.2`, commit `5ab222a958`). The package version is `0.1.0-alpha.6`, published on npm with the `alpha` dist-tag on 2026-11-13 by [workflow run 43361879530](https://github.com/f4ah6o/dsh-SIWC/actions/runs/43361879530) with provenance.
 
 | Check | Result and evidence |
 |---|---|
@@ -11,9 +11,9 @@ The plugin source now targets DSH `0.2.2-rc.2` (the local checkout reports `0.2.
 | Install | PASS: `pnpm install --no-frozen-lockfile` resolved 317 entries and installed 248 packages; the lockfile contains no `0.2.1-rc.2` references. |
 | Build and typecheck | PASS: `pnpm run build` built Host `lib/index.js`/`lib/preflight.js` and Client `lib/client.js`; `pnpm run typecheck` passed for both projects. The generator now requires the generated `lib/typert.remote-client.d.ts.map` to be listed in the package `files`, so that entry was added. |
 | Tests | PASS: `pnpm test` ran 11 files and 77 tests, all passing, including the new `tests/failures.test.ts` cases for the preferred `LlmError.fromFailure` path and the legacy constructor fallback. |
-| Auxiliary wire probe | PASS: the local `0.1.0-alpha.6` tarball passed against a separate published `0.2.2-rc.2` consumer with Cordis `4.1.0`; title, compaction, usage, pre-HTTP cap rejection (`UNSUPPORTED_PARAMETER`), and tool-call cases passed, and the probe recorded `consumerVersion: "0.2.2-rc.2"`. |
+| Auxiliary wire probe | PASS: both the local build and the registry artifact of `0.1.0-alpha.6` passed against a separate published `0.2.2-rc.2` consumer with Cordis `4.1.0`; title, compaction, usage, pre-HTTP cap rejection (`UNSUPPORTED_PARAMETER`), and tool-call cases passed, and the probe recorded `consumerVersion: "0.2.2-rc.2"`. |
 | Fresh Web smoke | PASS: the tarball installed into a fresh Web profile of the current `0.2.2-rc.2` checkout; the composed config contained the `chatgpt` and `chatgpt-preflight` rows, Chromium loaded the served plugin `client.js`, and **Settings → ChatGPT** rendered the empty-account state with no page or request errors. Screenshot: [siwc-rc22-chatgpt-settings.png](siwc-rc22-chatgpt-settings.png). |
-| npm publication | NOT RUN: `0.1.0-alpha.6` is unpublished; the trusted publish workflow default now names `0.1.0-alpha.6`. |
+| npm publication | PASS: `alpha` dist-tag now points to `0.1.0-alpha.6`; registry SHA-256 `609d5fb7de3ca5cf07358f02120f21ce4945a2a4a014501fbc842f677c053762`, SHA-1 `c637c20ec8218e58ddb08dd162faa888d2b5af4f`, integrity `sha512-c3HRQRS+9zKs6lCnpp4Q/175f9IF6PyA/aiV6ySjXAOEHMBHue0ugK3Q+7XfFW5QjtqEpoZctECpq6XeACl1Hw==`, provenance attestation recorded. |
 
 This run did not exercise live ChatGPT inference, a connected account, headless/SDK profiles, or a packaged Desktop release. The plugin keeps its supported DSH lines from `0.2.0-rc.2` through `0.2.1-rc.2`; the `providerFailure` helper uses `LlmError.fromFailure` when the runtime provides it and the constructor otherwise.
 

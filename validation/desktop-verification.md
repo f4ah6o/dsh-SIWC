@@ -1,15 +1,15 @@
 # Installed Desktop verification
 
-Desktop acceptance is incomplete. A Windows attempt with official DSH `0.2.0-rc.2` added the then-current plugin artifact, then hit a TypeError at `dsh-desktop-host/lib/index.js:337:29`: `ctx.connection` was missing when Desktop read `authenticatedUrl`. The underlying composition cause is unresolved, and the artifact source was not recorded. The v5 and prepublication `0.1.0` compatibility matrices used the official and fork CLIs but did not install or launch the plugin in Desktop. The `0.1.0-alpha.6` candidate for DSH `0.2.2-rc.2` is not yet published and has not been tested in Desktop. Run this checklist on a supported macOS or Windows release target; Linux is not a supported Desktop release target.
+Desktop acceptance is incomplete. A Windows attempt with official DSH `0.2.0-rc.2` added the then-current plugin artifact, then hit a TypeError at `dsh-desktop-host/lib/index.js:337:29`: `ctx.connection` was missing when Desktop read `authenticatedUrl`. The underlying composition cause is unresolved, and the artifact source was not recorded. The v5 and prepublication `0.1.0` compatibility matrices used the official and fork CLIs but did not install or launch the plugin in Desktop. The `0.1.0-alpha.6` release for DSH `0.2.2-rc.2` is published but has not been tested in Desktop. Run this checklist on a supported macOS or Windows release target; Linux is not a supported Desktop release target.
 
 ## Record the target
 
-Use a separate empty Harness home for each target row. Never use a home that contains a real ChatGPT grant. The target is the planned alpha release `@f12o/dsh-siwc@0.1.0-alpha.6` with npm dist-tag `alpha`; not yet published, prepared 2026-11-13. Its workspace tarball is [`dist/f12o-dsh-siwc-0.1.0-alpha.6.tgz`](../dist/f12o-dsh-siwc-0.1.0-alpha.6.tgz), SHA-256 `0c0c7a220661554de0e9c7295257b96ad844eb11fc33acd507d422190a24bebb`. The preserved v5 tarball belongs to the former package identity and is historical evidence only:
+Use a separate empty Harness home for each target row. Never use a home that contains a real ChatGPT grant. The target is the planned alpha release `@f12o/dsh-siwc@0.1.0-alpha.6` with npm dist-tag `alpha`; published on 2026-11-13. Its workspace tarball is [`dist/f12o-dsh-siwc-0.1.0-alpha.6.tgz`](../dist/f12o-dsh-siwc-0.1.0-alpha.6.tgz), SHA-256 `0c0c7a220661554de0e9c7295257b96ad844eb11fc33acd507d422190a24bebb`. The preserved v5 tarball belongs to the former package identity and is historical evidence only:
 
 | Field | Value |
 |---|---|
-| Planned npm package | `@f12o/dsh-siwc@0.1.0-alpha.6`, dist-tag `alpha` (not yet published; prepared 2026-11-13) |
-| Install spec after publication | `@f12o/dsh-siwc@0.1.0-alpha.6`; until then use the local tarball |
+| Planned npm package | `@f12o/dsh-siwc@0.1.0-alpha.6`, dist-tag `alpha` (published 2026-11-13) |
+| Install spec after publication | `@f12o/dsh-siwc@0.1.0-alpha.6` |
 | Prior prepublication candidate tarball | `dist/f12o-dsh-siwc-0.1.0.tgz`; historical preparation artifact only |
 | Prior candidate SHA-256 | `15c16502dc658f752c5551b116d98dae286f32c69de3cc9e4d54a279ef1c4110` |
 | Alpha tarball | Packed; build, typecheck, 77 tests, wire probe, and current-DSH Web smoke passed; Desktop validation pending |
@@ -59,7 +59,7 @@ Repeat the procedure for each Host variant being qualified. The existing artifac
    ```sh
    DSH_HOME="$HOME/dsh-chatgpt-desktop-check/<target>" \
      "<bundled dsh CLI path documented for this release>" \
-     plugin --profile desktop add '<plugin checkout>/dist/f12o-dsh-siwc-0.1.0-alpha.6.tgz'
+     plugin --profile desktop add '@f12o/dsh-siwc@0.1.0-alpha.6'
    ```
 
    Windows PowerShell:
@@ -67,7 +67,7 @@ Repeat the procedure for each Host variant being qualified. The existing artifac
    ```powershell
    $env:DSH_HOME = "$env:LOCALAPPDATA\dsh-chatgpt-desktop-check\<target>"
    & "<bundled dsh CLI path documented for this release>" `
-     plugin --profile desktop add '<plugin checkout>/dist/f12o-dsh-siwc-0.1.0-alpha.6.tgz'
+     plugin --profile desktop add '@f12o/dsh-siwc@0.1.0-alpha.6'
    ```
 
    The alpha.5 package is published; do not treat this step as validated until that exact release is installed and checked in Desktop. Confirm the bundled CLI location in the documentation for the exact Desktop release; packaging paths may differ by release. Alternatively, use Desktop's Plugin Manager after its profile has been initialized. The current fork's Desktop guide documents `resources/runtime/cli/bin/dsh` (`dsh.cmd` on Windows), but that path has not been confirmed for both official versions in this matrix. Desktop uses its bundled runtime and pnpm for CLI plugin management; no system Node.js, pnpm, or local tarball transfer is required after publication. Do not run `dsh --profile desktop`, `--dump-config`, raw SDK arguments, custom package binaries, or platform-guard bypasses.
@@ -81,6 +81,6 @@ Repeat the procedure for each Host variant being qualified. The existing artifac
 | Host variant | Desktop version | OS/architecture | Install method | Startup, empty-state, restart, and clean-quit result |
 |---|---|---|---|---|
 | Official DSH `0.2.0-rc.2`, prior artifact attempt | `0.2.0-rc.2` (confirm installed version) | Windows (architecture pending) | Then-current plugin artifact; source not recorded | TypeError after plugin add at `dsh-desktop-host/lib/index.js:337:29`: missing `ctx.connection` while reading `authenticatedUrl`; cause unresolved |
-| DSH `0.2.2-rc.2` (current checkout), planned alpha release | `0.2.2-rc.2` (target; confirm installed version) | Pending | Local `dist/f12o-dsh-siwc-0.1.0-alpha.6.tgz` until publication | Pending; alpha.6 is not yet published and has not been tested in Desktop |
+| DSH `0.2.2-rc.2` (current checkout), planned alpha release | `0.2.2-rc.2` (target; confirm installed version) | Pending | `@f12o/dsh-siwc@0.1.0-alpha.6` | Pending; alpha.6 is published but has not been tested in Desktop |
 | Historical DSH `0.2.1-alpha.1` | Pending | Pending | Pending | Pending |
 | `f4ah6o/deepseek-harness` fork | Pending | Pending | Pending | Pending |

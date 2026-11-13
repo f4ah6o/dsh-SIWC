@@ -26,7 +26,7 @@ kind: "package-bundle"
 
 ### 从 npm 安装
 
-将预发布版 `0.1.0-alpha.6` 添加到每个需要使用 ChatGPT 的 profile（尚未发布；发布前请使用下方的本地 Pack）：
+将已发布的预发布版 `0.1.0-alpha.6` 添加到每个需要使用 ChatGPT 的 profile：
 
 ```sh
 dsh plugin --profile web add @f12o/dsh-siwc@0.1.0-alpha.6
