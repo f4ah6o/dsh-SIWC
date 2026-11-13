@@ -1,6 +1,20 @@
 /** Client-safe account and model settings shared with the generated Remote API. */
 import type { Branded } from '@deepseek-ai/dsh-brand'
 import type { ModelModality } from '@deepseek-ai/dsh-llm'
+import type {} from '@deepseek-ai/dsh-llm/types'
+
+/**
+ * Auxiliary request purposes the Responses adapter recognizes. DSH 0.2.2-rc.2
+ * makes `GenerateOptions.purpose` a producer-declared map; the compaction and
+ * session-title producers declare these same keys with the same value, so the
+ * declarations merge without changing either producer's contract.
+ */
+declare module '@deepseek-ai/dsh-llm/types' {
+  interface LlmRequestPurposeMap {
+    'compaction': true
+    'session-title': true
+  }
+}
 
 /** Opaque profile-scoped identity for one ChatGPT account registration. */
 export type ChatGptAccountId = Branded<'ChatGptAccountId'>

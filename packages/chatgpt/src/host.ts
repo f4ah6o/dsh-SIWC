@@ -9,6 +9,7 @@ import { brandString } from '@deepseek-ai/dsh-brand'
 import { LlmError, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
 import type { ImageAttachmentRef, StoredImageAttachment } from '@deepseek-ai/dsh-attachment'
 import type { Config } from './config.js'
+import { providerFailure } from './failures.js'
 import type { ChatGptAdapterHost, ChatGptPreparedCall } from './adapter-contract.js'
 import {
   authorizationUrl, exchangeAuthorizationCode, OAuthError, randomOAuthValue,
@@ -439,7 +440,7 @@ export class ChatGptHost implements ChatGptAdapterHost {
     accountSignal.throwIfAborted()
     const current = await this.readAccount(accountId)
     if (current?.status !== 'connected' || current.grantGeneration !== account.grantGeneration) {
-      throw new LlmError('The ChatGPT account grant changed while refreshing its model catalog', 'CHATGPT_ACCOUNT_CHANGED')
+      throw providerFailure('The ChatGPT account grant changed while refreshing its model catalog', 'CHATGPT_ACCOUNT_CHANGED')
     }
     return await this.getState()
   }
@@ -492,7 +493,7 @@ export class ChatGptHost implements ChatGptAdapterHost {
     if (row === undefined) throw new LlmError(`ChatGPT model "${model}" is not list-visible for the active account`, 'UNKNOWN_MODEL')
     const metadata = this.resolveMetadata(row, modelOverrides)
     if (metadata === undefined) {
-      throw new LlmError(`ChatGPT model "${model}" needs a configured context-window limit`, 'MODEL_CONTEXT_REQUIRED')
+      throw providerFailure(`ChatGPT model "${model}" needs a configured context-window limit`, 'MODEL_CONTEXT_REQUIRED')
     }
     const resolved = toOpenAiResolvedModelInfo('chatgpt', metadata)
     const override = modelOverrides.find(candidate => candidate.model === model)
@@ -534,7 +535,7 @@ export class ChatGptHost implements ChatGptAdapterHost {
     requestSignal.throwIfAborted()
     const current = await this.readAccount(accountIdOf(account.accountId))
     if (current?.status !== 'connected' || current.grantGeneration !== account.grantGeneration) {
-      throw new LlmError('The ChatGPT account grant changed while preparing the request', 'CHATGPT_ACCOUNT_CHANGED')
+      throw providerFailure('The ChatGPT account grant changed while preparing the request', 'CHATGPT_ACCOUNT_CHANGED')
     }
     requestSignal.throwIfAborted()
     return {
@@ -775,7 +776,7 @@ export class ChatGptHost implements ChatGptAdapterHost {
     const accounts = await this.accountRecords()
     const connected = accounts.filter(account => account.status === 'connected')
     const selected = this.selectActive(connected, selection)
-    if (selected === undefined) throw new LlmError('Connect a ChatGPT account before using the ChatGPT model provider', 'CHATGPT_SIGN_IN_REQUIRED')
+    if (selected === undefined) throw providerFailure('Connect a ChatGPT account before using the ChatGPT model provider', 'CHATGPT_SIGN_IN_REQUIRED')
     return selected
   }
 
@@ -815,9 +816,9 @@ export class ChatGptHost implements ChatGptAdapterHost {
     let refreshFailure: OAuthError | undefined
     const key = accountKey(accountIdOf(accountId))
     const record = await this.ctx.credentials.modifyRecord(key, async current => {
-      if (current === undefined) throw new LlmError('The ChatGPT account registration is missing', 'CHATGPT_ACCOUNT_MISSING')
+      if (current === undefined) throw providerFailure('The ChatGPT account registration is missing', 'CHATGPT_ACCOUNT_MISSING')
       const account = readAccount(current, accountId)
-      if (account.status !== 'connected') throw new LlmError('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED')
+      if (account.status !== 'connected') throw providerFailure('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED')
       if ((account.expiresAt ?? 0) > Date.now() + 30_000) return current
       try {
         const grant = await refreshGrant({
@@ -850,11 +851,11 @@ export class ChatGptHost implements ChatGptAdapterHost {
       }
     })
     signal?.throwIfAborted()
-    if (refreshFailure !== undefined) throw new LlmError('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED', { cause: refreshFailure })
-    if (record === undefined) throw new LlmError('The ChatGPT account registration is missing', 'CHATGPT_ACCOUNT_MISSING')
+    if (refreshFailure !== undefined) throw providerFailure('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED', { cause: refreshFailure })
+    if (record === undefined) throw providerFailure('The ChatGPT account registration is missing', 'CHATGPT_ACCOUNT_MISSING')
     const account = readAccount(record, accountId)
     if (account.status !== 'connected' || account.accessToken === undefined) {
-      throw new LlmError('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED')
+      throw providerFailure('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED')
     }
     return account
   }
@@ -1131,7 +1132,7 @@ function readCatalog(value: unknown): readonly CatalogModel[] {
 function connectedGrant(account: StoredAccount): OAuthGrant {
   if (account.status !== 'connected' || account.accessToken === undefined || account.refreshToken === undefined
     || account.idToken === undefined || account.expiresAt === undefined || account.scopes === undefined) {
-    throw new LlmError('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED')
+    throw providerFailure('Sign in to the ChatGPT account again before making a request', 'CHATGPT_SIGN_IN_REQUIRED')
   }
   return {
     clientId: account.clientId,

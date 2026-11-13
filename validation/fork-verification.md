@@ -1,5 +1,22 @@
 # Fork verification report
 
+## Current DSH 0.2.2-rc.2 compatibility (2026-11-13)
+
+The plugin source now targets DSH `0.2.2-rc.2` (the local checkout reports `0.2.2-rc.2`, commit `5ab222a958`). The package version is prepared as `0.1.0-alpha.6` but has not been published to npm; `0.1.0-alpha.5` remains the latest published prerelease.
+
+| Check | Result and evidence |
+|---|---|
+| Dependency update | PASS: DSH packages moved from `0.2.1-rc.2` to `0.2.2-rc.2`; Cordis `4.1.0`, loader `1.1.0`, include `1.1.0`, group `1.1.0`, cosmokit `1.9.0`, and schemastery `3.19.0` are the versions used by the current runtime. |
+| Typert generator patch | PASS: the patch is now `patches/@deepseek-ai__dsh-typert-generator@0.2.2-rc.2.patch`; it applies to the published generator and the fixed code is present in the installed package. |
+| Install | PASS: `pnpm install --no-frozen-lockfile` resolved 317 entries and installed 248 packages; the lockfile contains no `0.2.1-rc.2` references. |
+| Build and typecheck | PASS: `pnpm run build` built Host `lib/index.js`/`lib/preflight.js` and Client `lib/client.js`; `pnpm run typecheck` passed for both projects. The generator now requires the generated `lib/typert.remote-client.d.ts.map` to be listed in the package `files`, so that entry was added. |
+| Tests | PASS: `pnpm test` ran 11 files and 77 tests, all passing, including the new `tests/failures.test.ts` cases for the preferred `LlmError.fromFailure` path and the legacy constructor fallback. |
+| Auxiliary wire probe | PASS: the local `0.1.0-alpha.6` tarball passed against a separate published `0.2.2-rc.2` consumer with Cordis `4.1.0`; title, compaction, usage, pre-HTTP cap rejection (`UNSUPPORTED_PARAMETER`), and tool-call cases passed, and the probe recorded `consumerVersion: "0.2.2-rc.2"`. |
+| Fresh Web smoke | PASS: the tarball installed into a fresh Web profile of the current `0.2.2-rc.2` checkout; the composed config contained the `chatgpt` and `chatgpt-preflight` rows, Chromium loaded the served plugin `client.js`, and **Settings → ChatGPT** rendered the empty-account state with no page or request errors. Screenshot: [siwc-rc22-chatgpt-settings.png](siwc-rc22-chatgpt-settings.png). |
+| npm publication | NOT RUN: `0.1.0-alpha.6` is unpublished; the trusted publish workflow default now names `0.1.0-alpha.6`. |
+
+This run did not exercise live ChatGPT inference, a connected account, headless/SDK profiles, or a packaged Desktop release. The plugin keeps its supported DSH lines from `0.2.0-rc.2` through `0.2.1-rc.2`; the `providerFailure` helper uses `LlmError.fromFailure` when the runtime provides it and the constructor otherwise.
+
 ## Current DSH 0.2.1-rc.2 compatibility (2026-10-17)
 
 The plugin source now targets DSH `0.2.1-rc.2` (the current checkout is `527a1000cf` on the `shiguredo` branch, whose running UI reports `0.2.1-rc.2-527a100-dirty`). The package version is `0.1.0-alpha.5`, published on npm with the `alpha` dist-tag on 2026-10-17 by [workflow run 39027790810](https://github.com/f4ah6o/dsh-SIWC/actions/runs/39027790810) with provenance.

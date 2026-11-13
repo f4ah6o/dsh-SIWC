@@ -33,6 +33,7 @@
     "src/oauth.ts",
     "src/host.ts",
     "src/adapter-contract.ts",
+    "src/failures.ts",
     "src/models.ts",
     "src/responses.ts"
   ]

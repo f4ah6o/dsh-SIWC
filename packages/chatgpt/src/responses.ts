@@ -34,6 +34,7 @@ import type {
   ToolSchema,
 } from '@deepseek-ai/dsh-llm'
 import { fileHandleText, textOnlyImageText } from '@deepseek-ai/dsh-llm'
+import { providerFailure } from './failures.js'
 import type { ChatGptAdapterHost, ChatGptPreparedCall } from './adapter-contract.js'
 
 /** OpenAI API base URL for OAuth tokens exchanged through Sign in with ChatGPT. */
@@ -165,17 +166,17 @@ function validatePreparedCall(prepared: ChatGptPreparedCall): void {
     throw new LlmError('ChatGPT host prepared an empty Responses access token', 'INVALID_CREDENTIAL')
   }
   if (!Number.isFinite(prepared.requestTimeoutMs) || prepared.requestTimeoutMs <= 0) {
-    throw new LlmError('ChatGPT host prepared an invalid request timeout', 'INVALID_REQUEST_TIMEOUT')
+    throw providerFailure('ChatGPT host prepared an invalid request timeout', 'INVALID_REQUEST_TIMEOUT')
   }
 }
 
 function exactModel(provider: string, model: string, info: LlmResolvedModelInfo): LlmResolvedModelInfo {
   if (info.id !== model) {
-    throw new LlmError(`ChatGPT host resolved "${info.id}" for requested model "${model}"`, 'MODEL_ID_MISMATCH')
+    throw providerFailure(`ChatGPT host resolved "${info.id}" for requested model "${model}"`, 'MODEL_ID_MISMATCH')
   }
   const contextWindow = info.context?.contextWindow
   if (!Number.isSafeInteger(contextWindow) || (contextWindow ?? 0) <= 0) {
-    throw new LlmError(
+    throw providerFailure(
       `ChatGPT model "${model}" needs an official or configured context-window limit`,
       'MODEL_CONTEXT_REQUIRED',
     )
@@ -192,13 +193,13 @@ function exactModel(provider: string, model: string, info: LlmResolvedModelInfo)
 function assertSupportedOptions(options: GenerateOptions): void {
   const auxiliaryPurpose = options.purpose === 'session-title' || options.purpose === 'compaction'
   if (options.maxTokens !== undefined && !auxiliaryPurpose) {
-    throw new LlmError('Sign in with ChatGPT Responses does not accept GenerateOptions.maxTokens', 'UNSUPPORTED_PARAMETER')
+    throw providerFailure('Sign in with ChatGPT Responses does not accept GenerateOptions.maxTokens', 'UNSUPPORTED_PARAMETER')
   }
   if (options.temperature !== undefined) {
-    throw new LlmError('Sign in with ChatGPT Responses does not accept GenerateOptions.temperature', 'UNSUPPORTED_PARAMETER')
+    throw providerFailure('Sign in with ChatGPT Responses does not accept GenerateOptions.temperature', 'UNSUPPORTED_PARAMETER')
   }
   if (options.stop !== undefined) {
-    throw new LlmError('The Responses API does not accept GenerateOptions.stop', 'UNSUPPORTED_PARAMETER')
+    throw providerFailure('The Responses API does not accept GenerateOptions.stop', 'UNSUPPORTED_PARAMETER')
   }
 }
 
@@ -893,7 +894,7 @@ function normalizeError(error: unknown, fallbackRequestId?: string): LlmError {
     const id = nonEmpty(error.requestID) ?? nonEmpty(fallbackRequestId)
     const retryAfter = error.headers?.get('retry-after')
     const delay = retryAfterMs(retryAfter)
-    return new LlmError(error.message || 'OpenAI Responses request failed', code, {
+    return providerFailure(error.message || 'OpenAI Responses request failed', code, {
       cause: error,
       ...(error.status === undefined ? {} : { status: error.status }),
       ...(id === undefined ? {} : { requestId: ProviderRequestId(id) }),
@@ -903,7 +904,7 @@ function normalizeError(error: unknown, fallbackRequestId?: string): LlmError {
   const message = error instanceof Error && error.message !== ''
     ? error.message
     : 'OpenAI Responses stream failed'
-  return new LlmError(message, 'OPENAI_RESPONSES_ERROR', {
+  return providerFailure(message, 'OPENAI_RESPONSES_ERROR', {
     cause: error,
     ...(fallbackRequestId === undefined ? {} : { requestId: ProviderRequestId(fallbackRequestId) }),
   })
@@ -929,7 +930,7 @@ function responseEventError(
   const message = parts.length === 0 ? 'OpenAI Responses stream failed' : parts.join(': ')
   const classified = providerFailureCode(code, undefined, `${code ?? ''} ${type ?? ''} ${message}`)
   const failureCode = classified === 'OPENAI_RESPONSES_ERROR' ? fallbackCode : classified
-  return new LlmError(message, failureCode, {
+  return providerFailure(message, failureCode, {
     cause: detail,
     ...(requestId === undefined ? {} : { requestId: ProviderRequestId(requestId) }),
   })
